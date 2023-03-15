@@ -4,6 +4,10 @@ import Foundation
 class KeyManager {
   static let keyName = "authsignal_sec_key"
   
+  static func getKey() -> SecKey? {
+    return loadKey(name: keyName)
+  }
+  
   static func getOrCreatePublicKey() -> String? {
     let publicKey = getPublicKey()
     
@@ -19,7 +23,7 @@ class KeyManager {
       return nil
     }
     
-    return getPublicKey(secKey: secKey)
+    return derivePublicKey(secKey: secKey)
   }
   
   static func createKeyPair() -> String? {
@@ -52,10 +56,29 @@ class KeyManager {
       return nil
     }
     
-    return getPublicKey(secKey: privateKey)
+    return derivePublicKey(secKey: privateKey)
   }
   
-  static func getPublicKey(secKey: SecKey) -> String? {
+  static func deleteKeyPair() -> Bool {
+    let tag = keyName.data(using: .utf8)!
+            
+    let query: [String: Any] = [
+      kSecClass as String : kSecClassKey,
+      kSecAttrApplicationTag as String : tag,
+      kSecAttrKeyType as String : kSecAttrKeyTypeEC,
+      kSecReturnRef as String : true
+    ]
+
+    let status = SecItemDelete(query as CFDictionary)
+    
+    guard status == errSecSuccess else {
+      return false;
+    }
+    
+    return true
+  }
+  
+  static func derivePublicKey(secKey: SecKey) -> String? {
     guard let publicKey = SecKeyCopyPublicKey(secKey) else {
       print("Error copying public key")
       
@@ -95,7 +118,6 @@ class KeyManager {
     
     return (item as! SecKey)
   }
-  
   
   private static func createSubjectPublicKeyInfo(rawPublicKeyData: Data) -> Data {
     let secp256r1Header = Data(_: [

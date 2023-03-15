@@ -9,11 +9,11 @@ class DeviceAPI {
     self.tenantId = Bundle.main.object(forInfoDictionaryKey: "AuthsignalTenantID") as? String
     
     if self.baseUrl == nil {
-      print("Error enrolling: AuthsignalURL not configured.")
+      print("AuthsignalURL not configured.")
     }
     
     if self.baseUrl == nil {
-      print("Error enrolling: AuthsignalTenant not configured.")
+      print("AuthsignalTenant not configured.")
     }
   }
   

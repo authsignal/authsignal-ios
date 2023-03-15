@@ -27,12 +27,18 @@ public class AuthsignalDevice {
   }
   
   static public func updateChallenge(_ challengeId: String, withApproval approved: Bool) async -> Void {
-    let publicKey = KeyManager.getPublicKey()
+    let secKey = KeyManager.getKey()
     
-    let secKey = KeyManager.loadKey(name: KeyManager.keyName)
-
-    guard let publicKey = publicKey, let secKey = secKey else {
+    guard let secKey = secKey else {
       print("Error updating challenge: device not enrolled.")
+      
+      return
+    }
+    
+    let publicKey = KeyManager.derivePublicKey(secKey: secKey)
+    
+    guard let publicKey = publicKey else {
+      print("Error updating challenge: unable to derive public key.")
       
       return
     }
@@ -48,5 +54,9 @@ public class AuthsignalDevice {
     }
     
     return await api.updateChallenge(challengeId, publicKey: publicKey, signature: signature!, approved: approved)
+  }
+  
+  static public func deleteKey() -> Bool {
+    return KeyManager.deleteKeyPair()
   }
 }
