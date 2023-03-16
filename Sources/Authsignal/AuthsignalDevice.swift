@@ -6,14 +6,58 @@ public class AuthsignalDevice {
     return DeviceAPI()
   }
   
-  static public func enrollWithAccessToken(_ accessToken: String) async -> Bool {
+  static public func addCredential(accessToken: String) async -> Bool {
     guard let publicKey = KeyManager.getOrCreatePublicKey() else {
-      print("Error enrolling: unable to generate key pair.")
+      print("Error adding credential: unable to generate key pair.")
       
       return false
     }
     
-    return await api.enrollWithAccessToken(accessToken, publicKey: publicKey)
+    return await api.addCredential(accessToken: accessToken, publicKey: publicKey)
+  }
+  
+  static public func removeCredential() async -> Bool {
+    let secKey = KeyManager.getKey()
+    
+    guard let secKey = secKey else {
+      print("Error removing credential: no credential found.")
+      
+      return false
+    }
+    
+    let publicKey = KeyManager.derivePublicKey(secKey: secKey)
+    
+    guard let publicKey = publicKey else {
+      print("Error removing credential: unable to derive public key.")
+      
+      return false
+    }
+    
+    let tenantId = Bundle.main.object(forInfoDictionaryKey: "AuthsignalTenant") as? String
+    
+    guard let tenantId = tenantId else {
+      print("Error removing credential: AuthsignalTenant not configured.")
+      
+      return false
+    }
+    
+    var signature: String? = nil
+    
+    do {
+      signature = try Signature.sign(message: tenantId, privateKey: secKey)
+    } catch {
+      print("Error generating signature: \(error).")
+      
+      return false
+    }
+    
+    let success = await api.removeCredential(publicKey: publicKey, signature: signature!)
+    
+    if (success) {
+      return KeyManager.deleteKeyPair()
+    }
+    
+    return false
   }
   
   static public func getChallenge() async -> String? {
@@ -50,13 +94,9 @@ public class AuthsignalDevice {
     } catch {
       print("Error generating signature: \(error).")
       
-      return;
+      return
     }
     
     return await api.updateChallenge(challengeId, publicKey: publicKey, signature: signature!, approved: approved)
-  }
-  
-  static public func deleteKey() -> Bool {
-    return KeyManager.deleteKeyPair()
   }
 }
