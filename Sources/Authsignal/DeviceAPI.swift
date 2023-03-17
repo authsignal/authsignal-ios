@@ -6,23 +6,23 @@ class DeviceAPI {
   
   init() {
     self.baseUrl = Bundle.main.object(forInfoDictionaryKey: "AuthsignalURL") as? String
-    self.tenantId = Bundle.main.object(forInfoDictionaryKey: "AuthsignalTenantID") as? String
+    self.tenantId = Bundle.main.object(forInfoDictionaryKey: "AuthsignalTenant") as? String
     
     if self.baseUrl == nil {
       print("AuthsignalURL not configured.")
     }
     
-    if self.baseUrl == nil {
+    if self.tenantId == nil {
       print("AuthsignalTenant not configured.")
     }
   }
   
-  func enrollWithAccessToken(_ accessToken: String, publicKey: String) async -> Bool {
+  func addCredential(accessToken: String, publicKey: String) async -> Bool {
     guard let baseUrl = baseUrl else {
       return false
     }
     
-    let url = URL(string: "\(baseUrl)/enroll")!
+    let url = URL(string: "\(baseUrl)/add-credential")!
     let body = ["publicKey": publicKey]
     
     var request = URLRequest(url: url)
@@ -38,7 +38,7 @@ class DeviceAPI {
       
       if let responseJSON = responseJSON as? [String: Any] {
         if let userAuthenticatorId = responseJSON["userAuthenticatorId"] {
-          print("Authenticator is enrolled: \(userAuthenticatorId)")
+          print("Credential added for authenticator: \(userAuthenticatorId)")
           
           return true
         }
@@ -46,14 +46,48 @@ class DeviceAPI {
       
       return false
     } catch {
-      print("Error enrolling: \(error).")
+      print("Error adding credential: \(error).")
+      
+      return false
+    }
+  }
+  
+  func removeCredential(publicKey: String, signature: String) async -> Bool {
+    guard let baseUrl = baseUrl, let tenantId = tenantId else {
+      return false
+    }
+    
+    let url = URL(string: "\(baseUrl)/remove-credential")!
+    let body = ["tenantId": tenantId, "publicKey": publicKey, "signature": signature]
+    
+    var request = URLRequest(url: url)
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.httpMethod = "POST"
+    request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+    
+    do {
+      let (data, _) = try await URLSession.shared.data(for: request)
+      
+      let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+      
+      if let responseJSON = responseJSON as? [String: Any] {
+        if let userAuthenticatorId = responseJSON["removedAuthenticatorId"] {
+          print("Credential removed for authenticator: \(userAuthenticatorId)")
+          
+          return true
+        }
+      }
+      
+      return false
+    } catch {
+      print("Error removing credential: \(error).")
       
       return false
     }
   }
   
   public func getChallenge(publicKey: String) async -> String? {
-    guard let baseUrl = baseUrl else {
+    guard let baseUrl = baseUrl, let tenantId = tenantId else {
       return nil
     }
     
