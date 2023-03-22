@@ -2,18 +2,12 @@ import Foundation
 
 class DeviceAPI {
   private let baseUrl: String?
-  private let tenantId: String?
   
   init() {
     self.baseUrl = Bundle.main.object(forInfoDictionaryKey: "AuthsignalURL") as? String
-    self.tenantId = Bundle.main.object(forInfoDictionaryKey: "AuthsignalTenant") as? String
     
     if self.baseUrl == nil {
       print("AuthsignalURL not configured.")
-    }
-    
-    if self.tenantId == nil {
-      print("AuthsignalTenant not configured.")
     }
   }
   
@@ -53,12 +47,12 @@ class DeviceAPI {
   }
   
   func removeCredential(publicKey: String, signature: String) async -> Bool {
-    guard let baseUrl = baseUrl, let tenantId = tenantId else {
+    guard let baseUrl = baseUrl else {
       return false
     }
     
     let url = URL(string: "\(baseUrl)/remove-credential")!
-    let body = ["tenantId": tenantId, "publicKey": publicKey, "signature": signature]
+    let body = ["publicKey": publicKey, "signature": signature]
     
     var request = URLRequest(url: url)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -87,12 +81,12 @@ class DeviceAPI {
   }
   
   public func getChallenge(publicKey: String) async -> String? {
-    guard let baseUrl = baseUrl, let tenantId = tenantId else {
+    guard let baseUrl = baseUrl else {
       return nil
     }
     
     let url = URL(string: "\(baseUrl)/get-challenge")!
-    let body = ["tenantId": tenantId, "publicKey": publicKey]
+    let body = ["publicKey": publicKey]
     
     var request = URLRequest(url: url)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -121,14 +115,13 @@ class DeviceAPI {
   }
   
   public func updateChallenge(_ challengeId: String, publicKey: String, signature: String, approved: Bool) async -> Void {
-    guard let baseUrl = baseUrl, let tenantId = tenantId else {
+    guard let baseUrl = baseUrl else {
       return
     }
     
     let url = URL(string: "\(baseUrl)/update-challenge")!
     
     let body: [String: Any] = [
-      "tenantId": tenantId,
       "publicKey": publicKey,
       "sessionToken": challengeId,
       "approved": approved,

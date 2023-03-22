@@ -33,18 +33,10 @@ public class AuthsignalDevice {
       return false
     }
     
-    let tenantId = Bundle.main.object(forInfoDictionaryKey: "AuthsignalTenant") as? String
-    
-    guard let tenantId = tenantId else {
-      print("Error removing credential: AuthsignalTenant not configured.")
-      
-      return false
-    }
-    
     var signature: String? = nil
     
     do {
-      signature = try Signature.sign(message: tenantId, privateKey: secKey)
+      signature = try Signature.sign(message: "authsignal-remove-credential", privateKey: secKey)
     } catch {
       print("Error generating signature: \(error).")
       
