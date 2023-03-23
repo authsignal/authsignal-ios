@@ -46,13 +46,13 @@ class DeviceAPI {
     }
   }
   
-  func removeCredential(publicKey: String, signature: String) async -> Bool {
+  func removeCredential(challengeId: String, publicKey: String, signature: String) async -> Bool {
     guard let baseUrl = baseUrl else {
       return false
     }
     
     let url = URL(string: "\(baseUrl)/remove-credential")!
-    let body = ["publicKey": publicKey, "signature": signature]
+    let body = ["sessionToken": challengeId, "publicKey": publicKey, "signature": signature]
     
     var request = URLRequest(url: url)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")

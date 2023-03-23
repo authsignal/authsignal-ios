@@ -51,7 +51,7 @@ public class AuthsignalDevice {
       return false
     }
     
-    let success = await api.removeCredential(publicKey: publicKey, signature: signature!)
+    let success = await api.removeCredential(challengeId: challengeId, publicKey: publicKey, signature: signature!)
     
     if (success) {
       return KeyManager.deleteKeyPair()
