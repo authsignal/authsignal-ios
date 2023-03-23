@@ -2,7 +2,7 @@ import Security
 import Foundation
 
 class KeyManager {
-  static let keyName = "authsignal_sec_key"
+  static let keyName = "authsignal_signing_key"
   
   static func getKey() -> SecKey? {
     return loadKey(name: keyName)

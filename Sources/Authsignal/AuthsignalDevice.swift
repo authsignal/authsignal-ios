@@ -33,10 +33,10 @@ public class AuthsignalDevice {
       return false
     }
     
-    let tenantId = Bundle.main.object(forInfoDictionaryKey: "AuthsignalTenant") as? String
+    let challengeId = await api.startChallenge(publicKey: publicKey)
     
-    guard let tenantId = tenantId else {
-      print("Error removing credential: AuthsignalTenant not configured.")
+    guard let challengeId = challengeId else {
+      print("Error removing credential: unable to start challenge.")
       
       return false
     }
@@ -44,14 +44,14 @@ public class AuthsignalDevice {
     var signature: String? = nil
     
     do {
-      signature = try Signature.sign(message: tenantId, privateKey: secKey)
+      signature = try Signature.sign(message: challengeId, privateKey: secKey)
     } catch {
       print("Error generating signature: \(error).")
       
       return false
     }
     
-    let success = await api.removeCredential(publicKey: publicKey, signature: signature!)
+    let success = await api.removeCredential(challengeId: challengeId, publicKey: publicKey, signature: signature!)
     
     if (success) {
       return KeyManager.deleteKeyPair()

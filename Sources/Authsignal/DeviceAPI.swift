@@ -2,18 +2,12 @@ import Foundation
 
 class DeviceAPI {
   private let baseUrl: String?
-  private let tenantId: String?
   
   init() {
     self.baseUrl = Bundle.main.object(forInfoDictionaryKey: "AuthsignalURL") as? String
-    self.tenantId = Bundle.main.object(forInfoDictionaryKey: "AuthsignalTenant") as? String
     
     if self.baseUrl == nil {
       print("AuthsignalURL not configured.")
-    }
-    
-    if self.tenantId == nil {
-      print("AuthsignalTenant not configured.")
     }
   }
   
@@ -52,13 +46,13 @@ class DeviceAPI {
     }
   }
   
-  func removeCredential(publicKey: String, signature: String) async -> Bool {
-    guard let baseUrl = baseUrl, let tenantId = tenantId else {
+  func removeCredential(challengeId: String, publicKey: String, signature: String) async -> Bool {
+    guard let baseUrl = baseUrl else {
       return false
     }
     
     let url = URL(string: "\(baseUrl)/remove-credential")!
-    let body = ["tenantId": tenantId, "publicKey": publicKey, "signature": signature]
+    let body = ["sessionToken": challengeId, "publicKey": publicKey, "signature": signature]
     
     var request = URLRequest(url: url)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -86,13 +80,47 @@ class DeviceAPI {
     }
   }
   
+  public func startChallenge(publicKey: String) async -> String? {
+    guard let baseUrl = baseUrl else {
+      return nil
+    }
+    
+    let url = URL(string: "\(baseUrl)/start-challenge")!
+    let body = ["publicKey": publicKey]
+    
+    var request = URLRequest(url: url)
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.httpMethod = "POST"
+    request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+    
+    do {
+      let (data, _) = try await URLSession.shared.data(for: request)
+      
+      let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+      
+      if let responseJSON = responseJSON as? [String: Any] {
+        if let challengeId = responseJSON["sessionToken"] as? String {
+          print("Challenge started: \(challengeId)")
+          
+          return challengeId
+        }
+      }
+      
+      return nil
+    } catch {
+      print("Error starting challenge: \(error).")
+      
+      return nil
+    }
+  }
+  
   public func getChallenge(publicKey: String) async -> String? {
-    guard let baseUrl = baseUrl, let tenantId = tenantId else {
+    guard let baseUrl = baseUrl else {
       return nil
     }
     
     let url = URL(string: "\(baseUrl)/get-challenge")!
-    let body = ["tenantId": tenantId, "publicKey": publicKey]
+    let body = ["publicKey": publicKey]
     
     var request = URLRequest(url: url)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -121,14 +149,13 @@ class DeviceAPI {
   }
   
   public func updateChallenge(_ challengeId: String, publicKey: String, signature: String, approved: Bool) async -> Void {
-    guard let baseUrl = baseUrl, let tenantId = tenantId else {
+    guard let baseUrl = baseUrl else {
       return
     }
     
     let url = URL(string: "\(baseUrl)/update-challenge")!
     
     let body: [String: Any] = [
-      "tenantId": tenantId,
       "publicKey": publicKey,
       "sessionToken": challengeId,
       "approved": approved,
