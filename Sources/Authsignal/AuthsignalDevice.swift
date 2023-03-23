@@ -33,10 +33,18 @@ public class AuthsignalDevice {
       return false
     }
     
+    let challengeId = await api.startChallenge(publicKey: publicKey)
+    
+    guard let challengeId = challengeId else {
+      print("Error removing credential: unable to start challenge.")
+      
+      return false
+    }
+    
     var signature: String? = nil
     
     do {
-      signature = try Signature.sign(message: "authsignal-remove-credential", privateKey: secKey)
+      signature = try Signature.sign(message: challengeId, privateKey: secKey)
     } catch {
       print("Error generating signature: \(error).")
       
