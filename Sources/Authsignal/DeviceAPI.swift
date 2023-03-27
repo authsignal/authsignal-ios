@@ -148,7 +148,7 @@ class DeviceAPI {
     }
   }
   
-  public func updateChallenge(_ challengeId: String, publicKey: String, signature: String, approved: Bool) async -> Void {
+  public func updateChallenge(challengeId: String, publicKey: String, signature: String, approved: Bool) async -> Void {
     guard let baseUrl = baseUrl else {
       return
     }

@@ -70,7 +70,7 @@ public class AuthsignalDevice {
     return await api.getChallenge(publicKey: publicKey)
   }
   
-  static public func updateChallenge(_ challengeId: String, withApproval approved: Bool) async -> Void {
+  static public func updateChallenge(challengeId: String, approved: Bool) async -> Void {
     let secKey = KeyManager.getKey()
     
     guard let secKey = secKey else {
@@ -97,6 +97,11 @@ public class AuthsignalDevice {
       return
     }
     
-    return await api.updateChallenge(challengeId, publicKey: publicKey, signature: signature!, approved: approved)
+    return await api.updateChallenge(
+      challengeId: challengeId,
+      publicKey: publicKey,
+      signature: signature!,
+      approved: approved
+    )
   }
 }
