@@ -10,7 +10,7 @@ class DeviceAPI {
     self.baseUrl = Bundle.main.object(forInfoDictionaryKey: "AuthsignalURL") as? String
 
     if self.baseUrl == nil {
-      logger.info("AuthsignalURL not configured.")
+      logger.warning("AuthsignalURL not configured.")
     }
   }
 
