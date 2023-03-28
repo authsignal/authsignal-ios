@@ -4,19 +4,23 @@
 import PackageDescription
 
 let package = Package(
-    name: "Authsignal",
-    platforms: [
-        .iOS(.v13)
-    ],
-    products: [
-        .library(
-            name: "Authsignal",
-            targets: ["Authsignal"]),
-    ],
-    dependencies: [],
-    targets: [
-        .target(
-            name: "Authsignal",
-            dependencies: []),
-    ]
+  name: "Authsignal",
+  platforms: [
+    .iOS(.v13)
+  ],
+  products: [
+    .library(
+      name: "Authsignal",
+      targets: ["Authsignal"])
+  ],
+  dependencies: [
+    .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0")
+  ],
+  targets: [
+    .target(
+      name: "Authsignal",
+      dependencies: [
+        .product(name: "Logging", package: "swift-log")
+      ])
+  ]
 )

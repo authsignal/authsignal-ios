@@ -1,14 +1,17 @@
 import Foundation
+import Logging
 import Security
 
-public class AuthsignalDevice {
-  static var api: DeviceAPI {
+public class Authsignal {
+  private static let logger = Logger(label: "com.authsignal.Authsignal")
+
+  private static var api: DeviceAPI {
     return DeviceAPI()
   }
 
   static public func addCredential(accessToken: String) async -> Bool {
     guard let publicKey = KeyManager.getOrCreatePublicKey() else {
-      print("Error adding credential: unable to generate key pair.")
+      logger.error("Error adding credential: unable to generate key pair.")
 
       return false
     }
@@ -20,7 +23,7 @@ public class AuthsignalDevice {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
-      print("Error removing credential: no credential found.")
+      logger.error("Error removing credential: no credential found.")
 
       return false
     }
@@ -28,7 +31,7 @@ public class AuthsignalDevice {
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
     guard let publicKey = publicKey else {
-      print("Error removing credential: unable to derive public key.")
+      logger.error("Error removing credential: unable to derive public key.")
 
       return false
     }
@@ -36,7 +39,7 @@ public class AuthsignalDevice {
     let challengeId = await api.startChallenge(publicKey: publicKey)
 
     guard let challengeId = challengeId else {
-      print("Error removing credential: unable to start challenge.")
+      logger.error("Error removing credential: unable to start challenge.")
 
       return false
     }
@@ -46,7 +49,7 @@ public class AuthsignalDevice {
     do {
       signature = try Signature.sign(message: challengeId, privateKey: secKey)
     } catch {
-      print("Error generating signature: \(error).")
+      logger.error("Error generating signature: \(error).")
 
       return false
     }
@@ -63,7 +66,7 @@ public class AuthsignalDevice {
 
   static public func getChallenge() async -> String? {
     guard let publicKey = KeyManager.getPublicKey() else {
-      print("Error getting challenge: device not enrolled.")
+      logger.error("Error getting challenge: device not enrolled.")
 
       return nil
     }
@@ -75,7 +78,7 @@ public class AuthsignalDevice {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
-      print("Error updating challenge: device not enrolled.")
+      logger.error("Error updating challenge: device not enrolled.")
 
       return
     }
@@ -83,7 +86,7 @@ public class AuthsignalDevice {
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
     guard let publicKey = publicKey else {
-      print("Error updating challenge: unable to derive public key.")
+      logger.error("Error updating challenge: unable to derive public key.")
 
       return
     }
@@ -93,7 +96,7 @@ public class AuthsignalDevice {
     do {
       signature = try Signature.sign(message: challengeId, privateKey: secKey)
     } catch {
-      print("Error generating signature: \(error).")
+      logger.error("Error generating signature: \(error).")
 
       return
     }
