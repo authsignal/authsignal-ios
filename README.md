@@ -1,3 +1,3 @@
 # Authsignal
 
-A description of this package.
+The Authsignal iOS SDK.
