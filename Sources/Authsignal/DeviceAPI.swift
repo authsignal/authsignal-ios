@@ -1,16 +1,13 @@
 import Foundation
-import Logging
 
 class DeviceAPI {
   private let baseUrl: String?
-
-  private let logger = Logger(label: "com.authsignal.DeviceAPI")
 
   init() {
     self.baseUrl = Bundle.main.object(forInfoDictionaryKey: "AuthsignalURL") as? String
 
     if self.baseUrl == nil {
-      logger.warning("AuthsignalURL not configured.")
+      Logger.info("AuthsignalURL not configured.")
     }
   }
 
@@ -35,7 +32,7 @@ class DeviceAPI {
 
       if let responseJSON = responseJSON as? [String: Any] {
         if let userAuthenticatorId = responseJSON["userAuthenticatorId"] {
-          logger.info("Credential added for authenticator: \(userAuthenticatorId)")
+          Logger.info("Credential added for authenticator: \(userAuthenticatorId)")
 
           return true
         }
@@ -43,7 +40,7 @@ class DeviceAPI {
 
       return false
     } catch {
-      logger.error("Error adding credential: \(error).")
+      Logger.error("Error adding credential: \(error).")
 
       return false
     }
@@ -69,7 +66,7 @@ class DeviceAPI {
 
       if let responseJSON = responseJSON as? [String: Any] {
         if let userAuthenticatorId = responseJSON["removedAuthenticatorId"] {
-          logger.info("Credential removed for authenticator: \(userAuthenticatorId)")
+          Logger.info("Credential removed for authenticator: \(userAuthenticatorId)")
 
           return true
         }
@@ -77,7 +74,7 @@ class DeviceAPI {
 
       return false
     } catch {
-      logger.error("Error removing credential: \(error).")
+      Logger.error("Error removing credential: \(error).")
 
       return false
     }
@@ -103,7 +100,7 @@ class DeviceAPI {
 
       if let responseJSON = responseJSON as? [String: Any] {
         if let challengeId = responseJSON["sessionToken"] as? String {
-          logger.info("Challenge started: \(challengeId)")
+          Logger.info("Challenge started: \(challengeId)")
 
           return challengeId
         }
@@ -111,7 +108,7 @@ class DeviceAPI {
 
       return nil
     } catch {
-      logger.error("Error starting challenge: \(error).")
+      Logger.error("Error starting challenge: \(error).")
 
       return nil
     }
@@ -137,7 +134,7 @@ class DeviceAPI {
 
       if let responseJSON = responseJSON as? [String: Any] {
         if let challengeId = responseJSON["sessionToken"] as? String {
-          logger.info("Challenge found: \(challengeId)")
+          Logger.info("Challenge found: \(challengeId)")
 
           return challengeId
         }
@@ -145,7 +142,7 @@ class DeviceAPI {
 
       return nil
     } catch {
-      logger.error("Error getting challenge: \(error).")
+      Logger.error("Error getting challenge: \(error).")
 
       return nil
     }
@@ -175,7 +172,7 @@ class DeviceAPI {
     do {
       let (_, _) = try await URLSession.shared.data(for: request)
     } catch {
-      logger.error("Error updating challenge: \(error).")
+      Logger.error("Error updating challenge: \(error).")
     }
   }
 }

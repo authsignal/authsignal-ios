@@ -13,14 +13,10 @@ let package = Package(
       name: "Authsignal",
       targets: ["Authsignal"])
   ],
-  dependencies: [
-    .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0")
-  ],
+  dependencies: [],
   targets: [
     .target(
       name: "Authsignal",
-      dependencies: [
-        .product(name: "Logging", package: "swift-log")
-      ])
+      dependencies: [])
   ]
 )

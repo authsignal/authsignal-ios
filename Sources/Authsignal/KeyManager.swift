@@ -1,11 +1,8 @@
 import Foundation
-import Logging
 import Security
 
 class KeyManager {
   private static let keyName = "authsignal_signing_key"
-
-  private static let logger = Logger(label: "com.authsignal.KeyManager")
 
   static func getKey() -> SecKey? {
     return loadKey(name: keyName)
@@ -83,7 +80,7 @@ class KeyManager {
 
   static func derivePublicKey(secKey: SecKey) -> String? {
     guard let publicKey = SecKeyCopyPublicKey(secKey) else {
-      print("Error copying public key")
+      Logger.error("Error copying public key")
 
       return nil
     }
@@ -91,7 +88,7 @@ class KeyManager {
     var error: Unmanaged<CFError>?
 
     guard let cfdata = SecKeyCopyExternalRepresentation(publicKey, &error) else {
-      logger.error("Error exporting public key")
+      Logger.error("Error exporting public key")
 
       return nil
     }
