@@ -33,26 +33,19 @@ public class Authsignal {
       return false
     }
 
-    let challengeId = await api.startChallenge(publicKey: publicKey)
-
-    guard let challengeId = challengeId else {
-      Logger.error("Error removing credential: unable to start challenge.")
-
-      return false
-    }
-
     var signature: String? = nil
 
+    let message = getTimeBasedDataToSign()
+
     do {
-      signature = try Signature.sign(message: challengeId, privateKey: secKey)
+      signature = try Signature.sign(message: message, privateKey: secKey)
     } catch {
       Logger.error("Error generating signature.")
 
       return false
     }
 
-    let success = await api.removeCredential(
-      challengeId: challengeId, publicKey: publicKey, signature: signature!)
+    let success = await api.removeCredential(publicKey: publicKey, signature: signature!)
 
     if success {
       return KeyManager.deleteKeyPair()
@@ -104,5 +97,11 @@ public class Authsignal {
       signature: signature!,
       approved: approved
     )
+  }
+  
+  private static func getTimeBasedDataToSign() -> String {
+    let secondsSinceEpoch = Double(Date().timeIntervalSince1970);
+    
+    return String(floor(secondsSinceEpoch / (60 * 10)))
   }
 }

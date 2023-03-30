@@ -16,7 +16,7 @@ class DeviceAPI {
       return false
     }
 
-    let url = URL(string: "\(baseUrl)/add-credential")!
+    let url = URL(string: "\(baseUrl)/device/add-credential")!
     let body = ["publicKey": publicKey]
 
     var request = URLRequest(url: url)
@@ -46,13 +46,13 @@ class DeviceAPI {
     }
   }
 
-  func removeCredential(challengeId: String, publicKey: String, signature: String) async -> Bool {
+  func removeCredential(publicKey: String, signature: String) async -> Bool {
     guard let baseUrl = baseUrl else {
       return false
     }
 
-    let url = URL(string: "\(baseUrl)/remove-credential")!
-    let body = ["sessionToken": challengeId, "publicKey": publicKey, "signature": signature]
+    let url = URL(string: "\(baseUrl)/device/remove-credential")!
+    let body = ["publicKey": publicKey, "signature": signature]
 
     var request = URLRequest(url: url)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -80,46 +80,12 @@ class DeviceAPI {
     }
   }
 
-  public func startChallenge(publicKey: String) async -> String? {
-    guard let baseUrl = baseUrl else {
-      return nil
-    }
-
-    let url = URL(string: "\(baseUrl)/start-challenge")!
-    let body = ["publicKey": publicKey]
-
-    var request = URLRequest(url: url)
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.httpMethod = "POST"
-    request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-
-    do {
-      let (data, _) = try await URLSession.shared.data(for: request)
-
-      let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
-
-      if let responseJSON = responseJSON as? [String: Any] {
-        if let challengeId = responseJSON["sessionToken"] as? String {
-          Logger.info("Challenge started: \(challengeId)")
-
-          return challengeId
-        }
-      }
-
-      return nil
-    } catch {
-      Logger.error("Error starting challenge: \(error).")
-
-      return nil
-    }
-  }
-
   public func getChallenge(publicKey: String) async -> String? {
     guard let baseUrl = baseUrl else {
       return nil
     }
 
-    let url = URL(string: "\(baseUrl)/get-challenge")!
+    let url = URL(string: "\(baseUrl)/device/check-challenge")!
     let body = ["publicKey": publicKey]
 
     var request = URLRequest(url: url)
@@ -155,7 +121,7 @@ class DeviceAPI {
       return
     }
 
-    let url = URL(string: "\(baseUrl)/update-challenge")!
+    let url = URL(string: "\(baseUrl)/device/update-challenge")!
 
     let body: [String: Any] = [
       "publicKey": publicKey,
