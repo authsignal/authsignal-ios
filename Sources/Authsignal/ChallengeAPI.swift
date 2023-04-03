@@ -1,6 +1,6 @@
 import Foundation
 
-class DeviceAPI {
+class ChallengeAPI {
   private let baseUrl: String
 
   public init(region: AuthsignalRegion = .us) {

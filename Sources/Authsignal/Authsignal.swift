@@ -2,14 +2,14 @@ import Foundation
 import Security
 
 public class Authsignal {
-  private let api: DeviceAPI
+  private let api: ChallengeAPI
 
   public init(region: AuthsignalRegion = .us) {
-    api = DeviceAPI(region: region)
+    api = ChallengeAPI(region: region)
   }
   
   public init(withBaseUrl baseUrl: String) {
-    api = DeviceAPI(withBaseUrl: baseUrl)
+    api = ChallengeAPI(withBaseUrl: baseUrl)
   }
   
   public func addCredential(accessToken: String) async -> Bool {
