@@ -2,11 +2,17 @@ import Foundation
 import Security
 
 public class Authsignal {
-  private static var api: DeviceAPI {
-    return DeviceAPI()
-  }
+  private let api: DeviceAPI
 
-  static public func addCredential(accessToken: String) async -> Bool {
+  public init(region: AuthsignalRegion = .us) {
+    api = DeviceAPI(region: region)
+  }
+  
+  public init(withBaseUrl baseUrl: String) {
+    api = DeviceAPI(withBaseUrl: baseUrl)
+  }
+  
+  public func addCredential(accessToken: String) async -> Bool {
     guard let publicKey = KeyManager.getOrCreatePublicKey() else {
       Logger.info("Error adding credential: unable to generate key pair.")
 
@@ -16,7 +22,7 @@ public class Authsignal {
     return await api.addCredential(accessToken: accessToken, publicKey: publicKey)
   }
 
-  static public func removeCredential() async -> Bool {
+  public func removeCredential() async -> Bool {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
@@ -54,7 +60,7 @@ public class Authsignal {
     return false
   }
 
-  static public func getChallenge() async -> String? {
+  public func getChallenge() async -> String? {
     guard let publicKey = KeyManager.getPublicKey() else {
       Logger.error("Error getting challenge: device not enrolled.")
 
@@ -64,7 +70,7 @@ public class Authsignal {
     return await api.getChallenge(publicKey: publicKey)
   }
 
-  static public func updateChallenge(challengeId: String, approved: Bool) async {
+  public func updateChallenge(challengeId: String, approved: Bool) async {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
@@ -99,7 +105,7 @@ public class Authsignal {
     )
   }
   
-  private static func getTimeBasedDataToSign() -> String {
+  private func getTimeBasedDataToSign() -> String {
     let secondsSinceEpoch = Double(Date().timeIntervalSince1970);
     
     return String(floor(secondsSinceEpoch / (60 * 10)))

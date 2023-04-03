@@ -1,21 +1,24 @@
 import Foundation
 
 class DeviceAPI {
-  private let baseUrl: String?
+  private let baseUrl: String
 
-  init() {
-    self.baseUrl = Bundle.main.object(forInfoDictionaryKey: "AuthsignalURL") as? String
-
-    if self.baseUrl == nil {
-      Logger.info("AuthsignalURL not configured.")
+  public init(region: AuthsignalRegion = .us) {
+    switch (region) {
+    case .au:
+      self.baseUrl = "https://au-challenge.authsignal.com/v1"
+    case .eu:
+      self.baseUrl = "https://eu-challenge.authsignal.com/v1"
+    case .us:
+      self.baseUrl = "https://challenge.authsignal.com/v1"
     }
+  }
+  
+  public init(withBaseUrl baseUrl: String) {
+    self.baseUrl = baseUrl
   }
 
   func addCredential(accessToken: String, publicKey: String) async -> Bool {
-    guard let baseUrl = baseUrl else {
-      return false
-    }
-
     let url = URL(string: "\(baseUrl)/device/add-credential")!
     let body = ["publicKey": publicKey]
 
@@ -47,10 +50,6 @@ class DeviceAPI {
   }
 
   func removeCredential(publicKey: String, signature: String) async -> Bool {
-    guard let baseUrl = baseUrl else {
-      return false
-    }
-
     let url = URL(string: "\(baseUrl)/device/remove-credential")!
     let body = ["publicKey": publicKey, "signature": signature]
 
@@ -81,10 +80,6 @@ class DeviceAPI {
   }
 
   public func getChallenge(publicKey: String) async -> String? {
-    guard let baseUrl = baseUrl else {
-      return nil
-    }
-
     let url = URL(string: "\(baseUrl)/device/check-challenge")!
     let body = ["publicKey": publicKey]
 
@@ -117,10 +112,6 @@ class DeviceAPI {
   public func updateChallenge(
     challengeId: String, publicKey: String, signature: String, approved: Bool
   ) async {
-    guard let baseUrl = baseUrl else {
-      return
-    }
-
     let url = URL(string: "\(baseUrl)/device/update-challenge")!
 
     let body: [String: Any] = [
@@ -161,4 +152,10 @@ extension URLSession {
       task.resume()
     }
   }
+}
+
+public enum AuthsignalRegion {
+  case us
+  case eu
+  case au
 }
