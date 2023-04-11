@@ -7,11 +7,11 @@ public class Authsignal {
   public init(region: AuthsignalRegion = .us) {
     api = ChallengeAPI(region: region)
   }
-  
+
   public init(withBaseUrl baseUrl: String) {
     api = ChallengeAPI(withBaseUrl: baseUrl)
   }
-  
+
   public func addCredential(accessToken: String) async -> Bool {
     guard let publicKey = KeyManager.getOrCreatePublicKey() else {
       Logger.info("Error adding credential: unable to generate key pair.")
@@ -70,7 +70,9 @@ public class Authsignal {
     return await api.getChallenge(publicKey: publicKey)
   }
 
-  public func updateChallenge(challengeId: String, approved: Bool) async {
+  public func updateChallenge(challengeId: String, approved: Bool, verificationCode: String? = nil)
+    async
+  {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
@@ -101,13 +103,14 @@ public class Authsignal {
       challengeId: challengeId,
       publicKey: publicKey,
       signature: signature!,
-      approved: approved
+      approved: approved,
+      verificationCode: verificationCode
     )
   }
-  
+
   private func getTimeBasedDataToSign() -> String {
-    let secondsSinceEpoch = Double(Date().timeIntervalSince1970);
-    
+    let secondsSinceEpoch = Double(Date().timeIntervalSince1970)
+
     return String(floor(secondsSinceEpoch / (60 * 10)))
   }
 }

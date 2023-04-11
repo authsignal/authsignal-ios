@@ -4,7 +4,7 @@ class ChallengeAPI {
   private let baseUrl: String
 
   public init(region: AuthsignalRegion = .us) {
-    switch (region) {
+    switch region {
     case .au:
       self.baseUrl = "https://au-challenge.authsignal.com/v1"
     case .eu:
@@ -13,7 +13,7 @@ class ChallengeAPI {
       self.baseUrl = "https://challenge.authsignal.com/v1"
     }
   }
-  
+
   public init(withBaseUrl baseUrl: String) {
     self.baseUrl = baseUrl
   }
@@ -110,16 +110,24 @@ class ChallengeAPI {
   }
 
   public func updateChallenge(
-    challengeId: String, publicKey: String, signature: String, approved: Bool
+    challengeId: String,
+    publicKey: String,
+    signature: String,
+    approved: Bool,
+    verificationCode: String?
   ) async {
     let url = URL(string: "\(baseUrl)/device/update-challenge")!
 
-    let body: [String: Any] = [
+    var body: [String: Any] = [
       "publicKey": publicKey,
       "sessionToken": challengeId,
       "approved": approved,
       "signature": signature,
     ]
+
+    if let verificationCode = verificationCode, !verificationCode.isEmpty {
+      body["verificationCode"] = verificationCode
+    }
 
     var request = URLRequest(url: url)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
