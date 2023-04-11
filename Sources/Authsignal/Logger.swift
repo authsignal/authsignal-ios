@@ -12,9 +12,10 @@ class Logger {
 
   private static func log(_ message: String, type: OSLogType, redacted: Bool) {
     let messageWithPrefix = "[Authsignal] \(message)"
-    
+
     if #available(iOS 12.0, *) {
-      os_log(type, redacted ? Constants.privateLogFormat : Constants.publicLogFormat, messageWithPrefix)
+      os_log(
+        type, redacted ? Constants.privateLogFormat : Constants.publicLogFormat, messageWithPrefix)
     } else {
       os_log(redacted ? Constants.privateLogFormat : Constants.publicLogFormat, messageWithPrefix)
     }

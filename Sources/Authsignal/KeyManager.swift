@@ -43,7 +43,7 @@ class KeyManager {
         kSecAttrIsPermanent as String: true,
         kSecAttrApplicationTag as String: tag,
         kSecAttrAccessControl as String: access,
-      ],
+      ] as [String: Any],
     ]
 
     var error: Unmanaged<CFError>?
