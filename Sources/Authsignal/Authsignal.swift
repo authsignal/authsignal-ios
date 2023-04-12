@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import UIKit
 
 public class Authsignal {
   private let api: ChallengeAPI
@@ -18,8 +19,10 @@ public class Authsignal {
 
       return false
     }
+    
+    let deviceName = await UIDevice.current.name
 
-    return await api.addCredential(accessToken: accessToken, publicKey: publicKey)
+    return await api.addCredential(accessToken: accessToken, publicKey: publicKey, deviceName: deviceName)
   }
 
   public func removeCredential() async -> Bool {
