@@ -18,9 +18,9 @@ class ChallengeAPI {
     self.baseUrl = baseUrl
   }
 
-  func addCredential(accessToken: String, publicKey: String) async -> Bool {
+  func addCredential(accessToken: String, publicKey: String, deviceName: String) async -> Bool {
     let url = URL(string: "\(baseUrl)/device/add-credential")!
-    let body = ["publicKey": publicKey]
+    let body = ["publicKey": publicKey, "deviceName": deviceName]
 
     var request = URLRequest(url: url)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
