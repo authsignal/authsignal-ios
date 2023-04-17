@@ -7,10 +7,32 @@ public class Authsignal {
 
   public init(region: AuthsignalRegion = .us) {
     api = ChallengeAPI(region: region)
+    
+    syncCredential()
   }
 
   public init(withBaseUrl baseUrl: String) {
     api = ChallengeAPI(withBaseUrl: baseUrl)
+    
+    syncCredential()
+  }
+  
+  public func getCredential() async -> String? {
+    let secKey = KeyManager.getKey()
+    
+    guard let secKey = secKey else {
+      return nil
+    }
+    
+    let publicKey = KeyManager.derivePublicKey(secKey: secKey)
+
+    guard let publicKey = publicKey else {
+      return nil
+    }
+    
+    let (_, credentialId) = await api.getCredential(publicKey: publicKey)
+    
+    return credentialId
   }
 
   public func addCredential(accessToken: String) async -> Bool {
@@ -109,6 +131,28 @@ public class Authsignal {
       approved: approved,
       verificationCode: verificationCode
     )
+  }
+  
+  private func syncCredential() -> Void {
+    Task.init {
+      let secKey = KeyManager.getKey()
+      
+      guard let secKey = secKey else {
+        return
+      }
+      
+      let publicKey = KeyManager.derivePublicKey(secKey: secKey)
+
+      guard let publicKey = publicKey else {
+        return
+      }
+      
+      let (success, credentialId) = await api.getCredential(publicKey: publicKey)
+      
+      if (success && credentialId == nil) {
+        let _ = KeyManager.deleteKeyPair()
+      }
+    }
   }
 
   private func getTimeBasedDataToSign() -> String {
