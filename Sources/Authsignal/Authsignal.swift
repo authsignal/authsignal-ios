@@ -39,7 +39,10 @@ public class Authsignal {
     let deviceName = await UIDevice.current.name
 
     return await api.addCredential(
-      accessToken: accessToken, publicKey: publicKey, deviceName: deviceName)
+      accessToken: accessToken,
+      publicKey: publicKey,
+      deviceName: deviceName
+    )
   }
 
   public func removeCredential() async -> Bool {
