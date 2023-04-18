@@ -13,16 +13,36 @@ public class Authsignal {
     api = ChallengeAPI(withBaseUrl: baseUrl)
   }
 
+  public func getCredential() async -> Credential? {
+    let secKey = KeyManager.getKey()
+
+    guard let secKey = secKey else {
+      return nil
+    }
+
+    let publicKey = KeyManager.derivePublicKey(secKey: secKey)
+
+    guard let publicKey = publicKey else {
+      return nil
+    }
+
+    return await api.getCredential(publicKey: publicKey)
+  }
+
   public func addCredential(accessToken: String) async -> Bool {
     guard let publicKey = KeyManager.getOrCreatePublicKey() else {
       Logger.info("Error adding credential: unable to generate key pair.")
 
       return false
     }
-    
+
     let deviceName = await UIDevice.current.name
 
-    return await api.addCredential(accessToken: accessToken, publicKey: publicKey, deviceName: deviceName)
+    return await api.addCredential(
+      accessToken: accessToken,
+      publicKey: publicKey,
+      deviceName: deviceName
+    )
   }
 
   public func removeCredential() async -> Bool {

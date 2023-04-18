@@ -18,6 +18,45 @@ class ChallengeAPI {
     self.baseUrl = baseUrl
   }
 
+  func getCredential(publicKey: String) async -> Credential? {
+    let url = URL(string: "\(baseUrl)/device/credential")!
+    let body = ["publicKey": publicKey]
+
+    var request = URLRequest(url: url)
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.httpMethod = "POST"
+    request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+
+    do {
+      let (data, _) = try await URLSession.shared.data(for: request)
+
+      let responseJSON = try? JSONSerialization.jsonObject(with: data, options: [])
+
+      if let responseJSON = responseJSON as? [String: Any] {
+        if let credentialId = responseJSON["userAuthenticatorId"] as? String {
+          Logger.info("Credential found: \(credentialId)")
+
+          let createdAt = responseJSON["verifiedAt"] as! String
+          let lastAuthenticatedAt = responseJSON["lastVerifiedAt"] as! String
+
+          return Credential(
+            credentialId: credentialId,
+            createdAt: createdAt,
+            lastAuthenticatedAt: lastAuthenticatedAt
+          )
+        } else {
+          return nil
+        }
+      }
+
+      return nil
+    } catch {
+      Logger.error("Error getting credential: \(error).")
+
+      return nil
+    }
+  }
+
   func addCredential(accessToken: String, publicKey: String, deviceName: String) async -> Bool {
     let url = URL(string: "\(baseUrl)/device/add-credential")!
     let body = ["publicKey": publicKey, "deviceName": deviceName]
@@ -80,7 +119,7 @@ class ChallengeAPI {
   }
 
   public func getChallenge(publicKey: String) async -> String? {
-    let url = URL(string: "\(baseUrl)/device/check-challenge")!
+    let url = URL(string: "\(baseUrl)/device/challenge")!
     let body = ["publicKey": publicKey]
 
     var request = URLRequest(url: url)
