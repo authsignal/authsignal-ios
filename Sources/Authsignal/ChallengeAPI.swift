@@ -17,9 +17,9 @@ class ChallengeAPI {
   public init(withBaseUrl baseUrl: String) {
     self.baseUrl = baseUrl
   }
-  
-  func getCredential(publicKey: String) async -> (Bool, String?) {
-    let url = URL(string: "\(baseUrl)/device/check-credential")!
+
+  func getCredential(publicKey: String) async -> Credential? {
+    let url = URL(string: "\(baseUrl)/device/credential")!
     let body = ["publicKey": publicKey]
 
     var request = URLRequest(url: url)
@@ -36,17 +36,24 @@ class ChallengeAPI {
         if let credentialId = responseJSON["userAuthenticatorId"] as? String {
           Logger.info("Credential found: \(credentialId)")
 
-          return (true, credentialId)
+          let createdAt = responseJSON["createdAt"] as! String
+          let lastAuthenticatedAt = responseJSON["lastAuthenticatedAt"] as! String
+
+          return Credential(
+            credentialId: credentialId,
+            createdAt: createdAt,
+            lastAuthenticatedAt: lastAuthenticatedAt
+          )
         } else {
-          return (true, nil)
+          return nil
         }
       }
 
-      return (false, nil)
+      return nil
     } catch {
       Logger.error("Error getting credential: \(error).")
 
-      return (false, nil)
+      return nil
     }
   }
 
@@ -112,7 +119,7 @@ class ChallengeAPI {
   }
 
   public func getChallenge(publicKey: String) async -> String? {
-    let url = URL(string: "\(baseUrl)/device/check-challenge")!
+    let url = URL(string: "\(baseUrl)/device/challenge")!
     let body = ["publicKey": publicKey]
 
     var request = URLRequest(url: url)

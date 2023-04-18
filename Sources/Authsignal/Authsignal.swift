@@ -7,31 +7,27 @@ public class Authsignal {
 
   public init(region: AuthsignalRegion = .us) {
     api = ChallengeAPI(region: region)
-    
-    syncCredential()
   }
 
   public init(withBaseUrl baseUrl: String) {
     api = ChallengeAPI(withBaseUrl: baseUrl)
-    
-    syncCredential()
   }
-  
+
   public func getCredential() async -> String? {
     let secKey = KeyManager.getKey()
-    
+
     guard let secKey = secKey else {
       return nil
     }
-    
+
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
     guard let publicKey = publicKey else {
       return nil
     }
-    
+
     let (_, credentialId) = await api.getCredential(publicKey: publicKey)
-    
+
     return credentialId
   }
 
@@ -41,10 +37,11 @@ public class Authsignal {
 
       return false
     }
-    
+
     let deviceName = await UIDevice.current.name
 
-    return await api.addCredential(accessToken: accessToken, publicKey: publicKey, deviceName: deviceName)
+    return await api.addCredential(
+      accessToken: accessToken, publicKey: publicKey, deviceName: deviceName)
   }
 
   public func removeCredential() async -> Bool {
@@ -132,24 +129,24 @@ public class Authsignal {
       verificationCode: verificationCode
     )
   }
-  
-  private func syncCredential() -> Void {
+
+  private func syncCredential() {
     Task.init {
       let secKey = KeyManager.getKey()
-      
+
       guard let secKey = secKey else {
         return
       }
-      
+
       let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
       guard let publicKey = publicKey else {
         return
       }
-      
+
       let (success, credentialId) = await api.getCredential(publicKey: publicKey)
-      
-      if (success && credentialId == nil) {
+
+      if success && credentialId == nil {
         let _ = KeyManager.deleteKeyPair()
       }
     }
