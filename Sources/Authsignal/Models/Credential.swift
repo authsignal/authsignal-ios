@@ -1,5 +1,5 @@
 public struct Credential {
-  let credentialId: String
-  let createdAt: String
-  let lastAuthenticatedAt: String
+  public let credentialId: String
+  public let createdAt: String
+  public let lastAuthenticatedAt: String
 }

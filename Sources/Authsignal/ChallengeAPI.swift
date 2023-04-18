@@ -36,8 +36,8 @@ class ChallengeAPI {
         if let credentialId = responseJSON["userAuthenticatorId"] as? String {
           Logger.info("Credential found: \(credentialId)")
 
-          let createdAt = responseJSON["createdAt"] as! String
-          let lastAuthenticatedAt = responseJSON["lastAuthenticatedAt"] as! String
+          let createdAt = responseJSON["verifiedAt"] as! String
+          let lastAuthenticatedAt = responseJSON["lastVerifiedAt"] as! String
 
           return Credential(
             credentialId: credentialId,
