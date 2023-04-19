@@ -37,7 +37,7 @@ class ChallengeAPI {
           Logger.info("Credential found: \(credentialId)")
 
           let createdAt = responseJSON["verifiedAt"] as! String
-          let lastAuthenticatedAt = responseJSON["lastVerifiedAt"] as! String
+          let lastAuthenticatedAt = responseJSON["lastVerifiedAt"] as? String
 
           return Credential(
             credentialId: credentialId,
@@ -77,6 +77,10 @@ class ChallengeAPI {
           Logger.info("Credential added for authenticator: \(userAuthenticatorId)")
 
           return true
+        }
+        
+        if let error = responseJSON["message"] {
+          Logger.error("Error adding credential: \(error)")
         }
       }
 
