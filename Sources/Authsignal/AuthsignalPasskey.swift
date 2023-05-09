@@ -41,7 +41,7 @@ public class AuthsignalPasskey {
   public func signIn(userName: String) async -> String? {
     let optsResponse = await api.authenticationOptions(userName: userName)
 
-    guard let optsResponse = optsResponse else {
+    guard let optsResponse = optsResponse, optsResponse.options.allowCredentials.count > 0 else {
       return nil
     }
 
@@ -62,7 +62,7 @@ public class AuthsignalPasskey {
 
     return verifyResponse?.accessToken
   }
-  
+
   public func initAutofill() async -> String? {
     let optsResponse = await api.authenticationOptions(userName: nil)
 
