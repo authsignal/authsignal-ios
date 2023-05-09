@@ -11,7 +11,7 @@ public class AuthsignalPasskey {
     passkeyManager = PasskeyManager()
   }
 
-  public func enroll(token: String, userName: String) async -> AddAuthenticatorResponse? {
+  public func signUp(token: String, userName: String) async -> String? {
     let optsResponse = await api.registrationOptions(token: token, userName: userName)
 
     guard let optsResponse = optsResponse else {
@@ -35,10 +35,10 @@ public class AuthsignalPasskey {
       credential: credential
     )
 
-    return addAuthenticatorResponse
+    return addAuthenticatorResponse?.accessToken
   }
 
-  public func challenge(userName: String? = nil, autofill: Bool = false) async -> VerifyResponse? {
+  public func signIn(userName: String) async -> String? {
     let optsResponse = await api.authenticationOptions(userName: userName)
 
     guard let optsResponse = optsResponse else {
@@ -48,7 +48,7 @@ public class AuthsignalPasskey {
     let credential = await passkeyManager.auth(
       relyingPartyID: optsResponse.options.rpId,
       challenge: optsResponse.options.challenge,
-      autofill: autofill
+      autofill: false
     )
 
     guard let credential = credential else {
@@ -60,7 +60,32 @@ public class AuthsignalPasskey {
       credential: credential
     )
 
-    return verifyResponse
+    return verifyResponse?.accessToken
+  }
+  
+  public func initAutofill() async -> String? {
+    let optsResponse = await api.authenticationOptions(userName: nil)
+
+    guard let optsResponse = optsResponse else {
+      return nil
+    }
+
+    let credential = await passkeyManager.auth(
+      relyingPartyID: optsResponse.options.rpId,
+      challenge: optsResponse.options.challenge,
+      autofill: true
+    )
+
+    guard let credential = credential else {
+      return nil
+    }
+
+    let verifyResponse = await api.verify(
+      challengeID: optsResponse.challengeId,
+      credential: credential
+    )
+
+    return verifyResponse?.accessToken
   }
 
   public func cancel() {
