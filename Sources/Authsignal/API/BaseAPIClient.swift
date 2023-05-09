@@ -22,7 +22,7 @@ class BaseAPIClient {
     return await performRequest(request: request)
   }
 
-  func postRequest<TBody: Encodable, TRes: Decodable>(url: String, body: TBody, auth: String? = nil)
+  func postRequest<TReq: Encodable, TRes: Decodable>(url: String, body: TReq, auth: String? = nil)
     async -> TRes?
   {
     var request = URLRequest(url: URL(string: url)!)
@@ -33,11 +33,9 @@ class BaseAPIClient {
 
     let encoder = JSONEncoder()
 
-    guard let httpBody = try? encoder.encode(body) else {
-      return nil
+    if let httpBody = try? encoder.encode(body) {
+      request.httpBody = httpBody
     }
-
-    request.httpBody = httpBody
 
     return await performRequest(request: request)
   }
