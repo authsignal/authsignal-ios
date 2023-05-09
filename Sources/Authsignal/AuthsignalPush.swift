@@ -4,7 +4,7 @@ import UIKit
 
 public class AuthsignalPush {
   private let api: PushAPIClient
-  
+
   public init(clientID: String, baseURL: String) {
     api = PushAPIClient(clientID: clientID, baseURL: baseURL)
   }
@@ -23,11 +23,11 @@ public class AuthsignalPush {
     }
 
     let response = await api.getCredential(publicKey: publicKey)
-    
+
     guard let response = response else {
       return nil
     }
-    
+
     return PushCredential(
       credentialID: response.userAuthenticatorId,
       createdAt: response.verifiedAt,
@@ -49,9 +49,9 @@ public class AuthsignalPush {
       publicKey: publicKey,
       deviceName: deviceName
     )
-    
+
     let success = response?.userAuthenticatorId != nil
-    
+
     return success
   }
 
@@ -87,7 +87,7 @@ public class AuthsignalPush {
     let response = await api.removeCredential(publicKey: publicKey, signature: signature!)
 
     let success = response?.removedAuthenticatorId != nil
-    
+
     if success {
       return KeyManager.deleteKeyPair()
     }
@@ -103,7 +103,7 @@ public class AuthsignalPush {
     }
 
     let challenge = await api.getChallenge(publicKey: publicKey)
-    
+
     return challenge?.challengeId
   }
 
