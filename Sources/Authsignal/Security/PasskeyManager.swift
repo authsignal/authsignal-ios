@@ -56,7 +56,7 @@ class PasskeyManager: NSObject {
       
       return registrationCredential
     } catch {
-      print("Registration error: \(error)")
+      Logger.error("Registration error: \(error)")
     }
     
     return nil
@@ -121,7 +121,7 @@ class PasskeyManager: NSObject {
       
       return authenticationCredential
     } catch {
-      print("Auth error: \(error)")
+      Logger.error("Authentication error: \(error)")
     }
     
     return nil
