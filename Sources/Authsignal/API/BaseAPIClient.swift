@@ -2,34 +2,40 @@ import Foundation
 
 class BaseAPIClient {
   let baseURL: String
-  let clientID: String
+  let basicAuth: String
 
-  var basicAuth: String {
-    return "Basic \(Data( "\(clientID):".utf8).base64URLEncodedString())"
-  }
-
-  public init(clientID: String, baseURL: String) {
-    self.clientID = clientID
+  public init(tenantID: String, baseURL: String) {
     self.baseURL = baseURL
+    self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
   }
 
-  func getRequest<T: Decodable>(url: String) async -> T? {
+  func getRequest<T: Decodable>(url: String, token: String? = nil) async -> T? {
     var request = URLRequest(url: URL(string: url)!)
 
     request.httpMethod = "GET"
-    request.setValue(basicAuth, forHTTPHeaderField: "Authorization")
-
+    
+    if let token = token {
+      request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    } else {
+      request.setValue(basicAuth, forHTTPHeaderField: "Authorization")
+    }
+  
     return await performRequest(request: request)
   }
 
-  func postRequest<TReq: Encodable, TRes: Decodable>(url: String, body: TReq, auth: String? = nil)
-    async -> TRes?
+  func postRequest<T: Decodable, TBody: Encodable>(url: String, body: TBody, token: String? = nil)
+    async -> T?
   {
     var request = URLRequest(url: URL(string: url)!)
 
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.setValue(auth ?? basicAuth, forHTTPHeaderField: "Authorization")
+    
+    if let token = token {
+      request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    } else {
+      request.setValue(basicAuth, forHTTPHeaderField: "Authorization")
+    }
 
     let encoder = JSONEncoder()
 

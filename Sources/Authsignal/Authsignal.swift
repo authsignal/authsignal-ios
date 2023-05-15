@@ -6,8 +6,8 @@ public class Authsignal {
   public let push: AuthsignalPush
   public let passkey: AuthsignalPasskey
 
-  public init(clientID: String, baseURL: String) {
-    push = AuthsignalPush(clientID: clientID, baseURL: baseURL)
-    passkey = AuthsignalPasskey(clientID: clientID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String) {
+    push = AuthsignalPush(tenantID: tenantID, baseURL: baseURL)
+    passkey = AuthsignalPasskey(tenantID: tenantID, baseURL: baseURL)
   }
 }

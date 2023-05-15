@@ -133,6 +133,9 @@ class PasskeyManager: NSObject {
 
       return authenticationCredential
     } catch {
+      self.controller = nil
+      self.continuation = nil
+      
       Logger.error("Authentication error: \(error)")
     }
 

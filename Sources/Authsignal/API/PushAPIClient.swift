@@ -4,16 +4,15 @@ class PushAPIClient: BaseAPIClient {
   func getCredential(publicKey: String) async -> CredentialResponse? {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
-    let url = "\(baseURL)/device/push/credential?publicKey=\(encodedKey)"
+    let url = "\(baseURL)/user-authenticators/push?publicKey=\(encodedKey)"
 
     return await getRequest(url: url)
   }
 
-  func addCredential(accessToken: String, publicKey: String, deviceName: String) async
+  func addCredential(token: String, publicKey: String, deviceName: String) async
     -> AddCredentialResponse?
   {
-    let url = "\(baseURL)/device/push/add-credential"
-    let auth = "Bearer \(accessToken)"
+    let url = "\(baseURL)/user-authenticators/push"
 
     let body = AddCredentialRequest(
       publicKey: publicKey,
@@ -21,11 +20,11 @@ class PushAPIClient: BaseAPIClient {
       devicePlatform: "ios"
     )
 
-    return await postRequest(url: url, body: body, auth: auth)
+    return await postRequest(url: url, body: body, token: token)
   }
 
   func removeCredential(publicKey: String, signature: String) async -> RemoveCredentialResponse? {
-    let url = "\(baseURL)/device/push/remove-credential"
+    let url = "\(baseURL)/user-authenticators/push/remove"
 
     let body = RemoveCredentialRequest(
       publicKey: publicKey,
@@ -38,7 +37,7 @@ class PushAPIClient: BaseAPIClient {
   public func getChallenge(publicKey: String) async -> ChallengeResponse? {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
-    let url = "\(baseURL)/device/push/challenge?publicKey=\(encodedKey)"
+    let url = "\(baseURL)/user-authenticators/push/challenge?publicKey=\(encodedKey)"
 
     return await getRequest(url: url)
   }
@@ -50,7 +49,7 @@ class PushAPIClient: BaseAPIClient {
     approved: Bool,
     verificationCode: String?
   ) async {
-    let url = "\(baseURL)/device/push/update-challenge"
+    let url = "\(baseURL)/user-authenticators/push/challenge"
 
     let body = UpdateChallengeRequest(
       challengeId: challengeID,
