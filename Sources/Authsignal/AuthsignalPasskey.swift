@@ -6,13 +6,13 @@ public class AuthsignalPasskey {
   private let api: PasskeyAPIClient
   private let passkeyManager: PasskeyManager
 
-  public init(clientID: String, baseURL: String) {
-    api = PasskeyAPIClient(clientID: clientID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String) {
+    api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL)
     passkeyManager = PasskeyManager()
   }
 
   public func signUp(token: String, userName: String) async -> String? {
-    let optsResponse = await api.registrationOptions(token: token, userName: userName)
+    let optsResponse = await api.registrationOptions(userName: userName, token: token)
 
     guard let optsResponse = optsResponse else {
       return nil
@@ -30,16 +30,16 @@ public class AuthsignalPasskey {
     }
 
     let addAuthenticatorResponse = await api.addAuthenticator(
-      token: token,
       challengeID: optsResponse.challengeId,
-      credential: credential
+      credential: credential,
+      token: token
     )
 
     return addAuthenticatorResponse?.accessToken
   }
 
-  public func signIn(userName: String) async -> String? {
-    let optsResponse = await api.authenticationOptions(userName: userName)
+  public func signIn(token: String) async -> String? {
+    let optsResponse = await api.authenticationOptions(token: token)
 
     guard let optsResponse = optsResponse, optsResponse.options.allowCredentials.count > 0 else {
       return nil
@@ -63,7 +63,7 @@ public class AuthsignalPasskey {
     return verifyResponse?.accessToken
   }
 
-  public func initAutofill() async -> String? {
+  public func challenge() async -> String? {
     let optsResponse = await api.authenticationOptions(userName: nil)
 
     guard let optsResponse = optsResponse else {

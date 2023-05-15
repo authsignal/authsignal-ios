@@ -5,8 +5,8 @@ import UIKit
 public class AuthsignalPush {
   private let api: PushAPIClient
 
-  public init(clientID: String, baseURL: String) {
-    api = PushAPIClient(clientID: clientID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String) {
+    api = PushAPIClient(tenantID: tenantID, baseURL: baseURL)
   }
 
   public func getCredential() async -> PushCredential? {
@@ -35,7 +35,7 @@ public class AuthsignalPush {
     )
   }
 
-  public func addCredential(accessToken: String) async -> Bool {
+  public func addCredential(token: String) async -> Bool {
     guard let publicKey = KeyManager.getOrCreatePublicKey() else {
       Logger.info("Error adding credential: unable to generate key pair.")
 
@@ -45,7 +45,7 @@ public class AuthsignalPush {
     let deviceName = await UIDevice.current.name
 
     let response = await api.addCredential(
-      accessToken: accessToken,
+      token: token,
       publicKey: publicKey,
       deviceName: deviceName
     )

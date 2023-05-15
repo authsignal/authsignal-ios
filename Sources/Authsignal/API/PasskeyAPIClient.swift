@@ -1,49 +1,49 @@
 import Foundation
 
 class PasskeyAPIClient: BaseAPIClient {
-  func registrationOptions(token: String, userName: String) async -> RegistrationOptsResponse? {
+  func registrationOptions(userName: String, token: String) async -> RegistrationOptsResponse? {
     let url = "\(baseURL)/user-authenticators/passkey/registration-options"
-    let auth = "Bearer \(token)"
 
     let body = RegistrationOptsRequest(username: userName)
 
-    return await postRequest(url: url, body: body, auth: auth)
+    return await postRequest(url: url, body: body, token: token)
   }
 
-  func authenticationOptions(userName: String?) async -> AuthenticationOptsResponse? {
-    let url = "\(baseURL)/device/passkey/authentication-options"
-
+  func authenticationOptions(userName: String? = nil, token: String? = nil) async -> AuthenticationOptsResponse? {
+    let url = "\(baseURL)/user-authenticators/passkey/authentication-options"
+  
     let body = AuthenticationOptsRequest(username: userName)
 
-    return await postRequest(url: url, body: body)
+    return await postRequest(url: url, body: body, token: token)
   }
 
   func addAuthenticator(
-    token: String,
     challengeID: String,
-    credential: PasskeyRegistrationCredential
+    credential: PasskeyRegistrationCredential,
+    token: String
   ) async -> AddAuthenticatorResponse? {
     let url = "\(baseURL)/user-authenticators/passkey"
-    let auth = "Bearer \(token)"
 
     let body = AddAuthenticatorRequest(
       challengeId: challengeID,
       registrationCredential: credential
     )
 
-    return await postRequest(url: url, body: body, auth: auth)
+    return await postRequest(url: url, body: body, token: token)
   }
 
-  func verify(challengeID: String, credential: PasskeyAuthenticationCredential) async
-    -> VerifyResponse?
-  {
-    let url = "\(baseURL)/device/passkey/verify"
+  func verify(
+    challengeID: String,
+    credential: PasskeyAuthenticationCredential,
+    token: String? = nil
+  ) async -> VerifyResponse? {
+    let url = "\(baseURL)/verify/passkey"
 
     let body = VerifyRequest(
       challengeId: challengeID,
       authenticationCredential: credential
     )
 
-    return await postRequest(url: url, body: body)
+    return await postRequest(url: url, body: body, token: token)
   }
 }
