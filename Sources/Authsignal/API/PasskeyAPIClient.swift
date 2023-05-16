@@ -1,7 +1,7 @@
 import Foundation
 
 class PasskeyAPIClient: BaseAPIClient {
-  func registrationOptions(userName: String, token: String) async -> RegistrationOptsResponse? {
+  func registrationOptions(userName: String?, token: String) async -> RegistrationOptsResponse? {
     let url = "\(baseURL)/user-authenticators/passkey/registration-options"
 
     let body = RegistrationOptsRequest(username: userName)
