@@ -79,7 +79,7 @@ public class AuthsignalPush {
     do {
       signature = try Signature.sign(message: message, privateKey: secKey)
     } catch {
-      Logger.error("Error generating signature.")
+      Logger.error("Error generating signature. \(error)")
 
       return false
     }

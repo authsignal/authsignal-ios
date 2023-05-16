@@ -11,7 +11,7 @@ public class AuthsignalPasskey {
     passkeyManager = PasskeyManager()
   }
 
-  public func signUp(token: String, userName: String) async -> String? {
+  public func signUp(token: String, userName: String? = nil) async -> String? {
     let optsResponse = await api.registrationOptions(userName: userName, token: token)
 
     guard let optsResponse = optsResponse else {
@@ -38,33 +38,14 @@ public class AuthsignalPasskey {
     return addAuthenticatorResponse?.accessToken
   }
 
-  public func signIn(token: String) async -> String? {
+  public func signIn(token: String? = nil, autofill: Bool = false) async -> String? {
+    if (token != nil && autofill) {
+      Logger.error("Autofill is not supported when providing a token.")
+      
+      return nil
+    }
+    
     let optsResponse = await api.authenticationOptions(token: token)
-
-    guard let optsResponse = optsResponse, optsResponse.options.allowCredentials.count > 0 else {
-      return nil
-    }
-
-    let credential = await passkeyManager.auth(
-      relyingPartyID: optsResponse.options.rpId,
-      challenge: optsResponse.options.challenge,
-      autofill: false
-    )
-
-    guard let credential = credential else {
-      return nil
-    }
-
-    let verifyResponse = await api.verify(
-      challengeID: optsResponse.challengeId,
-      credential: credential
-    )
-
-    return verifyResponse?.accessToken
-  }
-
-  public func challenge() async -> String? {
-    let optsResponse = await api.authenticationOptions(userName: nil)
 
     guard let optsResponse = optsResponse else {
       return nil
@@ -73,7 +54,7 @@ public class AuthsignalPasskey {
     let credential = await passkeyManager.auth(
       relyingPartyID: optsResponse.options.rpId,
       challenge: optsResponse.options.challenge,
-      autofill: true
+      autofill: autofill
     )
 
     guard let credential = credential else {

@@ -1,3 +1,3 @@
 public struct RegistrationOptsRequest: Codable {
-  public let username: String
+  public let username: String?
 }
