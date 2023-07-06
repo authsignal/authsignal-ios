@@ -11,62 +11,72 @@ public class AuthsignalPasskey {
     passkeyManager = PasskeyManager()
   }
 
-  public func signUp(token: String, userName: String? = nil) async -> String? {
+  public func signUp(token: String, userName: String? = nil) async -> AuthsignalResponse<String> {
     let optsResponse = await api.registrationOptions(userName: userName, token: token)
 
-    guard let optsResponse = optsResponse else {
-      return nil
+    guard let optsData = optsResponse.data else {
+      return AuthsignalResponse(error: optsResponse.error ?? "registration options error")
     }
 
-    let credential = await passkeyManager.register(
-      relyingPartyID: optsResponse.options.rp.id,
-      challenge: optsResponse.options.challenge,
-      userID: optsResponse.options.user.id,
-      displayName: optsResponse.options.user.displayName
+    let credentialResponse = await passkeyManager.register(
+      relyingPartyID: optsData.options.rp.id,
+      challenge: optsData.options.challenge,
+      userID: optsData.options.user.id,
+      displayName: optsData.options.user.displayName
     )
 
-    guard let credential = credential else {
-      return nil
+    guard let credential = credentialResponse.data else {
+      return AuthsignalResponse(error: optsResponse.error ?? "passkey registration error")
     }
 
     let addAuthenticatorResponse = await api.addAuthenticator(
-      challengeID: optsResponse.challengeId,
+      challengeID: optsData.challengeId,
       credential: credential,
       token: token
     )
+    
+    guard let resultToken = addAuthenticatorResponse.data?.accessToken else {
+      return AuthsignalResponse(error: addAuthenticatorResponse.error ?? "add authenticator error")
+    }
 
-    return addAuthenticatorResponse?.accessToken
+    return AuthsignalResponse(data: resultToken)
   }
 
-  public func signIn(token: String? = nil, autofill: Bool = false) async -> String? {
+  public func signIn(token: String? = nil, autofill: Bool = false) async -> AuthsignalResponse<String> {
     if (token != nil && autofill) {
-      Logger.error("Autofill is not supported when providing a token.")
+      let error = "autofill is not supported when providing a token"
       
-      return nil
+      Logger.error("Error: \(error)")
+      
+      return AuthsignalResponse(error: error)
     }
     
     let optsResponse = await api.authenticationOptions(token: token)
 
-    guard let optsResponse = optsResponse else {
-      return nil
+    guard let optsData = optsResponse.data else {
+      return AuthsignalResponse(error: optsResponse.error ?? "authentication options error")
     }
 
-    let credential = await passkeyManager.auth(
-      relyingPartyID: optsResponse.options.rpId,
-      challenge: optsResponse.options.challenge,
+    let credentialResponse = await passkeyManager.auth(
+      relyingPartyID: optsData.options.rpId,
+      challenge: optsData.options.challenge,
       autofill: autofill
     )
 
-    guard let credential = credential else {
-      return nil
+    guard let credential = credentialResponse.data else {
+      return AuthsignalResponse(error: optsResponse.error ?? "passkey authentication error")
     }
 
     let verifyResponse = await api.verify(
-      challengeID: optsResponse.challengeId,
+      challengeID: optsData.challengeId,
       credential: credential
     )
+    
+    guard let resultToken = verifyResponse.data?.accessToken else {
+      return AuthsignalResponse(error: verifyResponse.error ?? "verify error")
+    }
 
-    return verifyResponse?.accessToken
+    return AuthsignalResponse(data: resultToken)
   }
 
   public func cancel() {

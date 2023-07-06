@@ -9,37 +9,37 @@ public class AuthsignalPush {
     api = PushAPIClient(tenantID: tenantID, baseURL: baseURL)
   }
 
-  public func getCredential() async -> PushCredential? {
+  public func getCredential() async -> AuthsignalResponse<PushCredential> {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
-      return nil
+      return AuthsignalResponse(error: "Key pair not found")
     }
 
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
     guard let publicKey = publicKey else {
-      return nil
+      return AuthsignalResponse(error: "Error deriving public key")
     }
 
     let response = await api.getCredential(publicKey: publicKey)
 
-    guard let response = response else {
-      return nil
+    guard let responseData = response.data else {
+      return AuthsignalResponse(error: response.error)
     }
 
-    return PushCredential(
-      credentialID: response.userAuthenticatorId,
-      createdAt: response.verifiedAt,
-      lastAuthenticatedAt: response.lastVerifiedAt
+    let credential = PushCredential(
+      credentialID: responseData.userAuthenticatorId,
+      createdAt: responseData.verifiedAt,
+      lastAuthenticatedAt: responseData.lastVerifiedAt
     )
+    
+    return AuthsignalResponse(data: credential)
   }
 
-  public func addCredential(token: String) async -> Bool {
+  public func addCredential(token: String) async -> AuthsignalResponse<Bool> {
     guard let publicKey = KeyManager.getOrCreatePublicKey() else {
-      Logger.info("Error adding credential: unable to generate key pair.")
-
-      return false
+      return AuthsignalResponse(error: "Unable to generate key pair")
     }
 
     let deviceName = await UIDevice.current.name
@@ -49,27 +49,27 @@ public class AuthsignalPush {
       publicKey: publicKey,
       deviceName: deviceName
     )
+    
+    guard let responseData = response.data else {
+      return AuthsignalResponse(error: response.error)
+    }
+    
+    let success = responseData.userAuthenticatorId != nil
 
-    let success = response?.userAuthenticatorId != nil
-
-    return success
+    return AuthsignalResponse(data: success)
   }
 
-  public func removeCredential() async -> Bool {
+  public func removeCredential() async -> AuthsignalResponse<Bool> {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
-      Logger.error("Error removing credential: no credential found.")
-
-      return false
+      return AuthsignalResponse(error: "Key pair not found")
     }
 
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
     guard let publicKey = publicKey else {
-      Logger.error("Error removing credential: unable to derive public key.")
-
-      return false
+      return AuthsignalResponse(error: "Error deriving public key")
     }
 
     var signature: String? = nil
@@ -79,51 +79,53 @@ public class AuthsignalPush {
     do {
       signature = try Signature.sign(message: message, privateKey: secKey)
     } catch {
-      Logger.error("Error generating signature. \(error)")
-
-      return false
+      return AuthsignalResponse(error: "Error generating signature. \(error)")
     }
 
     let response = await api.removeCredential(publicKey: publicKey, signature: signature!)
 
-    let success = response?.removedAuthenticatorId != nil
+    guard let responseData = response.data else {
+      return AuthsignalResponse(error: response.error)
+    }
+    
+    let success = responseData.removedAuthenticatorId != nil
 
     if success {
-      return KeyManager.deleteKeyPair()
+      return AuthsignalResponse(data: KeyManager.deleteKeyPair())
     }
 
-    return false
+    return AuthsignalResponse(error: "Error removing authenticator")
   }
 
-  public func getChallenge() async -> String? {
+  public func getChallenge() async -> AuthsignalResponse<String> {
     guard let publicKey = KeyManager.getPublicKey() else {
-      Logger.error("Error getting challenge: device not enrolled.")
-
-      return nil
+      return AuthsignalResponse(error: "Key pair not found")
     }
 
-    let challenge = await api.getChallenge(publicKey: publicKey)
+    let response = await api.getChallenge(publicKey: publicKey)
 
-    return challenge?.challengeId
+    guard let responseData = response.data else {
+      return AuthsignalResponse(error: response.error)
+    }
+    
+    return AuthsignalResponse(data: responseData.challengeId)
   }
 
-  public func updateChallenge(challengeID: String, approved: Bool, verificationCode: String? = nil)
-    async
-  {
+  public func updateChallenge(
+    challengeID: String,
+    approved: Bool,
+    verificationCode: String? = nil
+  ) async -> AuthsignalResponse<Bool> {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
-      Logger.error("Error updating challenge: device not enrolled.")
-
-      return
+      return AuthsignalResponse(error: "Key pair not found")
     }
 
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
     guard let publicKey = publicKey else {
-      Logger.error("Error updating challenge: unable to derive public key.")
-
-      return
+      return AuthsignalResponse(error: "Error deriving public key")
     }
 
     var signature: String? = nil
@@ -131,18 +133,18 @@ public class AuthsignalPush {
     do {
       signature = try Signature.sign(message: challengeID, privateKey: secKey)
     } catch {
-      Logger.error("Error generating signature. \(error)")
-
-      return
+      return AuthsignalResponse(error: "Error generating signature. \(error)")
     }
 
-    return await api.updateChallenge(
+    let response = await api.updateChallenge(
       challengeID: challengeID,
       publicKey: publicKey,
       signature: signature!,
       approved: approved,
       verificationCode: verificationCode
     )
+    
+    return AuthsignalResponse(data: response.error == nil, error: response.error)
   }
 
   private func getTimeBasedDataToSign() -> String {

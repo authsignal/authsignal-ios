@@ -1,7 +1,10 @@
 import Foundation
 
 class PasskeyAPIClient: BaseAPIClient {
-  func registrationOptions(userName: String?, token: String) async -> RegistrationOptsResponse? {
+  func registrationOptions(
+    userName: String?,
+    token: String
+  ) async -> AuthsignalResponse<RegistrationOptsResponse> {
     let url = "\(baseURL)/user-authenticators/passkey/registration-options"
 
     let body = RegistrationOptsRequest(username: userName)
@@ -9,7 +12,10 @@ class PasskeyAPIClient: BaseAPIClient {
     return await postRequest(url: url, body: body, token: token)
   }
 
-  func authenticationOptions(userName: String? = nil, token: String? = nil) async -> AuthenticationOptsResponse? {
+  func authenticationOptions(
+    userName: String? = nil,
+    token: String? = nil
+  ) async -> AuthsignalResponse<AuthenticationOptsResponse> {
     let url = "\(baseURL)/user-authenticators/passkey/authentication-options"
   
     let body = AuthenticationOptsRequest(username: userName)
@@ -21,7 +27,7 @@ class PasskeyAPIClient: BaseAPIClient {
     challengeID: String,
     credential: PasskeyRegistrationCredential,
     token: String
-  ) async -> AddAuthenticatorResponse? {
+  ) async -> AuthsignalResponse<AddAuthenticatorResponse> {
     let url = "\(baseURL)/user-authenticators/passkey"
 
     let body = AddAuthenticatorRequest(
@@ -36,7 +42,7 @@ class PasskeyAPIClient: BaseAPIClient {
     challengeID: String,
     credential: PasskeyAuthenticationCredential,
     token: String? = nil
-  ) async -> VerifyResponse? {
+  ) async -> AuthsignalResponse<VerifyResponse> {
     let url = "\(baseURL)/verify/passkey"
 
     let body = VerifyRequest(
