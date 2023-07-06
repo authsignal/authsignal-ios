@@ -1,7 +1,7 @@
 import Foundation
 
 class PushAPIClient: BaseAPIClient {
-  func getCredential(publicKey: String) async -> CredentialResponse? {
+  func getCredential(publicKey: String) async -> AuthsignalResponse<CredentialResponse> {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
     let url = "\(baseURL)/user-authenticators/push?publicKey=\(encodedKey)"
@@ -9,8 +9,11 @@ class PushAPIClient: BaseAPIClient {
     return await getRequest(url: url)
   }
 
-  func addCredential(token: String, publicKey: String, deviceName: String) async
-    -> AddCredentialResponse?
+  func addCredential(
+    token: String,
+    publicKey: String,
+    deviceName: String
+  ) async -> AuthsignalResponse<AddCredentialResponse>
   {
     let url = "\(baseURL)/user-authenticators/push"
 
@@ -23,7 +26,10 @@ class PushAPIClient: BaseAPIClient {
     return await postRequest(url: url, body: body, token: token)
   }
 
-  func removeCredential(publicKey: String, signature: String) async -> RemoveCredentialResponse? {
+  func removeCredential(
+    publicKey: String,
+    signature: String
+  ) async -> AuthsignalResponse<RemoveCredentialResponse> {
     let url = "\(baseURL)/user-authenticators/push/remove"
 
     let body = RemoveCredentialRequest(
@@ -34,7 +40,7 @@ class PushAPIClient: BaseAPIClient {
     return await postRequest(url: url, body: body)
   }
 
-  public func getChallenge(publicKey: String) async -> ChallengeResponse? {
+  public func getChallenge(publicKey: String) async -> AuthsignalResponse<ChallengeResponse> {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
     let url = "\(baseURL)/user-authenticators/push/challenge?publicKey=\(encodedKey)"
@@ -48,7 +54,7 @@ class PushAPIClient: BaseAPIClient {
     signature: String,
     approved: Bool,
     verificationCode: String?
-  ) async {
+  ) async -> AuthsignalResponse<UpdateChallengeResponse> {
     let url = "\(baseURL)/user-authenticators/push/challenge"
 
     let body = UpdateChallengeRequest(
@@ -59,6 +65,6 @@ class PushAPIClient: BaseAPIClient {
       verificationCode: verificationCode
     )
 
-    let _: UpdateChallengeResponse? = await postRequest(url: url, body: body)
+    return await postRequest(url: url, body: body)
   }
 }

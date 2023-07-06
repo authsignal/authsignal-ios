@@ -9,7 +9,7 @@ class BaseAPIClient {
     self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
   }
 
-  func getRequest<T: Decodable>(url: String, token: String? = nil) async -> T? {
+  func getRequest<T: Decodable>(url: String, token: String? = nil) async -> AuthsignalResponse<T> {
     var request = URLRequest(url: URL(string: url)!)
 
     request.httpMethod = "GET"
@@ -24,7 +24,7 @@ class BaseAPIClient {
   }
 
   func postRequest<T: Decodable, TBody: Encodable>(url: String, body: TBody, token: String? = nil)
-    async -> T?
+    async -> AuthsignalResponse<T>
   {
     var request = URLRequest(url: URL(string: url)!)
 
@@ -46,7 +46,7 @@ class BaseAPIClient {
     return await performRequest(request: request)
   }
 
-  private func performRequest<T: Decodable>(request: URLRequest) async -> T? {
+  private func performRequest<T: Decodable>(request: URLRequest) async -> AuthsignalResponse<T> {
     do {
       let (data, response) = try await URLSession.shared.data(for: request)
 
@@ -55,24 +55,35 @@ class BaseAPIClient {
       if let httpResponse = response as? HTTPURLResponse,
         httpResponse.statusCode != 200
       {
-        if let error = json?["error"] as? String {
+        let error = json?["error"] as? String
+        let errorMessage = json?["message"] as? String
+        
+        if let error = error {
           Logger.error("Error: \(error)")
         }
 
-        if let errorMessage = json?["message"] as? String {
+        if let errorMessage = errorMessage {
           Logger.error("Error description: \(errorMessage)")
         }
-
-        return nil
+        
+        let rawError = String(data: data, encoding: String.Encoding.utf8)
+        
+        return AuthsignalResponse(error: errorMessage ?? error ?? rawError ?? "api error")
       }
 
       let decoder = JSONDecoder()
 
-      return try? decoder.decode(T.self, from: data)
+      let decoded = try? decoder.decode(T.self, from: data)
+      
+      if let decoded = decoded {
+        return AuthsignalResponse(data: decoded)
+      } else {
+        return AuthsignalResponse(error: "decoding error")
+      }
     } catch {
       Logger.error("Request error: \(error).")
 
-      return nil
+      return AuthsignalResponse(error: error.localizedDescription)
     }
   }
 }
