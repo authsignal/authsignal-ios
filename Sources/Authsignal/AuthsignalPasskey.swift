@@ -30,7 +30,7 @@ public class AuthsignalPasskey {
     }
 
     guard let credential = credentialResponse.data else {
-      return AuthsignalResponse(error:nil)
+      return AuthsignalResponse(error: nil)
     }
 
     let addAuthenticatorResponse = await api.addAuthenticator(
