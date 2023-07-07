@@ -24,9 +24,13 @@ public class AuthsignalPasskey {
       userID: optsData.options.user.id,
       displayName: optsData.options.user.displayName
     )
+    
+    if let error = credentialResponse.error {
+      return AuthsignalResponse(error: error)
+    }
 
     guard let credential = credentialResponse.data else {
-      return AuthsignalResponse(error: optsResponse.error ?? "passkey registration error")
+      return AuthsignalResponse(error: nil)
     }
 
     let addAuthenticatorResponse = await api.addAuthenticator(
@@ -62,9 +66,13 @@ public class AuthsignalPasskey {
       challenge: optsData.options.challenge,
       autofill: autofill
     )
+    
+    if let error = credentialResponse.error {
+      return AuthsignalResponse(error: error)
+    }
 
     guard let credential = credentialResponse.data else {
-      return AuthsignalResponse(error: optsResponse.error ?? "passkey authentication error")
+      return AuthsignalResponse(error: nil)
     }
 
     let verifyResponse = await api.verify(
