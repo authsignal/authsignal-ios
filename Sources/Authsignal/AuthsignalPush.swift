@@ -24,16 +24,20 @@ public class AuthsignalPush {
 
     let response = await api.getCredential(publicKey: publicKey)
 
-    guard let responseData = response.data else {
-      return AuthsignalResponse(error: response.error)
+    if let error = response.error {
+      return AuthsignalResponse(error: error)
+    }
+    
+    guard let data = response.data else {
+      return AuthsignalResponse(error: nil)
     }
 
     let credential = PushCredential(
-      credentialID: responseData.userAuthenticatorId,
-      createdAt: responseData.verifiedAt,
-      lastAuthenticatedAt: responseData.lastVerifiedAt
+      credentialID: data.userAuthenticatorId,
+      createdAt: data.verifiedAt,
+      lastAuthenticatedAt: data.lastVerifiedAt
     )
-    
+
     return AuthsignalResponse(data: credential)
   }
 
@@ -50,11 +54,11 @@ public class AuthsignalPush {
       deviceName: deviceName
     )
     
-    guard let responseData = response.data else {
+    guard let data = response.data else {
       return AuthsignalResponse(error: response.error)
     }
     
-    let success = responseData.userAuthenticatorId != nil
+    let success = data.userAuthenticatorId != nil
 
     return AuthsignalResponse(data: success)
   }
@@ -84,11 +88,11 @@ public class AuthsignalPush {
 
     let response = await api.removeCredential(publicKey: publicKey, signature: signature!)
 
-    guard let responseData = response.data else {
+    guard let data = response.data else {
       return AuthsignalResponse(error: response.error)
     }
     
-    let success = responseData.removedAuthenticatorId != nil
+    let success = data.removedAuthenticatorId != nil
 
     if success {
       return AuthsignalResponse(data: KeyManager.deleteKeyPair())
@@ -104,11 +108,15 @@ public class AuthsignalPush {
 
     let response = await api.getChallenge(publicKey: publicKey)
 
-    guard let responseData = response.data else {
+    if let error = response.error {
+      return AuthsignalResponse(error: error)
+    }
+    
+    guard let data = response.data else {
       return AuthsignalResponse(error: response.error)
     }
     
-    return AuthsignalResponse(data: responseData.challengeId)
+    return AuthsignalResponse(data: data.challengeId)
   }
 
   public func updateChallenge(
@@ -144,7 +152,7 @@ public class AuthsignalPush {
       verificationCode: verificationCode
     )
     
-    return AuthsignalResponse(data: response.error == nil, error: response.error)
+    return AuthsignalResponse(data: response.data != nil, error: response.error)
   }
 
   private func getTimeBasedDataToSign() -> String {
