@@ -19,6 +19,10 @@ class PasskeyManager: NSObject {
     guard let challengeData = Data(base64URLEncoded: challenge) else {
       return AuthsignalResponse(error: "error encoding challenge")
     }
+    
+    if self.continuation != nil || self.controller != nil {
+      return AuthsignalResponse(error: "credential registration already in progress")
+    }
 
     let userData = Data(userID.utf8)
 
@@ -32,6 +36,7 @@ class PasskeyManager: NSObject {
     )
 
     let controller = ASAuthorizationController(authorizationRequests: [request])
+    
     controller.delegate = self
     controller.presentationContextProvider = self
 
@@ -43,6 +48,9 @@ class PasskeyManager: NSObject {
 
         controller.performRequests()
       }
+      
+      self.controller = nil
+      self.continuation = nil
 
       guard
         let credential = authorization.credential
@@ -66,6 +74,9 @@ class PasskeyManager: NSObject {
 
       return AuthsignalResponse(data: registrationCredential)
     } catch {
+      self.controller = nil
+      self.continuation = nil
+      
       Logger.error("Registration error: \(error)")
       
       return AuthsignalResponse(error: error.localizedDescription)
