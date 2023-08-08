@@ -9,7 +9,7 @@ Check out our [official iOS documentation](https://docs.authsignal.com/sdks/clie
 Add Authsignal to your Podfile:
 
 ```rb
-pod 'Authsignal', '~> 0.1.10'
+pod 'Authsignal', '~> 0.1.11'
 ```
 
 #### Swift Package Manager
@@ -18,7 +18,7 @@ Add authsignal-ios to the dependencies value of your Package.swift.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/authsignal/authsignal-ios.git", .upToNextMajor(from: "0.1.10"))
+    .package(url: "https://github.com/authsignal/authsignal-ios.git", .upToNextMajor(from: "0.1.11"))
 ]
 ```
 
