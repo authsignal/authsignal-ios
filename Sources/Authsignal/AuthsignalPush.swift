@@ -13,7 +13,7 @@ public class AuthsignalPush {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
-      return AuthsignalResponse(error: "Key pair not found")
+      return AuthsignalResponse(error: nil)
     }
 
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
@@ -101,7 +101,7 @@ public class AuthsignalPush {
     return AuthsignalResponse(error: "Error removing authenticator")
   }
 
-  public func getChallenge() async -> AuthsignalResponse<String> {
+  public func getChallenge() async -> AuthsignalResponse<String?> {
     guard let publicKey = KeyManager.getPublicKey() else {
       return AuthsignalResponse(error: "Key pair not found")
     }
