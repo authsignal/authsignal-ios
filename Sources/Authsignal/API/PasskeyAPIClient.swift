@@ -5,7 +5,7 @@ class PasskeyAPIClient: BaseAPIClient {
     userName: String?,
     token: String
   ) async -> AuthsignalResponse<RegistrationOptsResponse> {
-    let url = "\(baseURL)/user-authenticators/passkey/registration-options"
+    let url = "\(baseURL)/client/user-authenticators/passkey/registration-options"
 
     let body = RegistrationOptsRequest(username: userName)
 
@@ -16,7 +16,7 @@ class PasskeyAPIClient: BaseAPIClient {
     userName: String? = nil,
     token: String? = nil
   ) async -> AuthsignalResponse<AuthenticationOptsResponse> {
-    let url = "\(baseURL)/user-authenticators/passkey/authentication-options"
+    let url = "\(baseURL)/client/user-authenticators/passkey/authentication-options"
   
     let body = AuthenticationOptsRequest(username: userName)
 
@@ -28,7 +28,7 @@ class PasskeyAPIClient: BaseAPIClient {
     credential: PasskeyRegistrationCredential,
     token: String
   ) async -> AuthsignalResponse<AddAuthenticatorResponse> {
-    let url = "\(baseURL)/user-authenticators/passkey"
+    let url = "\(baseURL)/client/user-authenticators/passkey"
 
     let body = AddAuthenticatorRequest(
       challengeId: challengeID,
@@ -43,7 +43,7 @@ class PasskeyAPIClient: BaseAPIClient {
     credential: PasskeyAuthenticationCredential,
     token: String? = nil
   ) async -> AuthsignalResponse<VerifyResponse> {
-    let url = "\(baseURL)/verify/passkey"
+    let url = "\(baseURL)/client/verify/passkey"
 
     let body = VerifyRequest(
       challengeId: challengeID,
