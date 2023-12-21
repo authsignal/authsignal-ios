@@ -11,8 +11,8 @@ public class AuthsignalPasskey {
     passkeyManager = PasskeyManager()
   }
 
-  public func signUp(token: String, userName: String? = nil) async -> AuthsignalResponse<String> {
-    let optsResponse = await api.registrationOptions(userName: userName, token: token)
+  public func signUp(token: String, userName: String? = nil, displayName: String? = nil) async -> AuthsignalResponse<String> {
+    let optsResponse = await api.registrationOptions(token: token, userName: userName, displayName: displayName)
 
     guard let optsData = optsResponse.data else {
       return AuthsignalResponse(error: optsResponse.error ?? "registration options error")
