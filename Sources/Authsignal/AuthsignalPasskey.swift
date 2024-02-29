@@ -5,6 +5,7 @@ import UIKit
 public class AuthsignalPasskey {
   private let api: PasskeyAPIClient
   private let passkeyManager: PasskeyManager
+  private let passkeyLocalKey = "@as_passkey_credential_id"
 
   public init(tenantID: String, baseURL: String) {
     api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL)
@@ -42,6 +43,8 @@ public class AuthsignalPasskey {
     guard let resultToken = addAuthenticatorResponse.data?.accessToken else {
       return AuthsignalResponse(error: addAuthenticatorResponse.error ?? "add authenticator error")
     }
+    
+    UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
 
     return AuthsignalResponse(data: resultToken)
   }
@@ -83,11 +86,27 @@ public class AuthsignalPasskey {
     guard let resultToken = verifyResponse.data?.accessToken else {
       return AuthsignalResponse(error: verifyResponse.error ?? "verify error")
     }
+    
+    UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
 
     return AuthsignalResponse(data: resultToken)
   }
 
   public func cancel() {
     passkeyManager.cancelRequest()
+  }
+  
+  public func isAvailableOnDevice() async -> AuthsignalResponse<Bool> {
+    guard let credentialId = UserDefaults.standard.string(forKey: passkeyLocalKey) else {
+      return AuthsignalResponse(data: false)
+    }
+    
+    let passkeyAuthenticatorResponse = await api.getPasskeyAuthenticator(credentialID: credentialId)
+    
+    if let error = passkeyAuthenticatorResponse.error {
+      return AuthsignalResponse(data: false, error: error)
+    } else {
+      return AuthsignalResponse(data: true)
+    }
   }
 }
