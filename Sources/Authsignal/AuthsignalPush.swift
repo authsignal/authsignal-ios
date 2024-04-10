@@ -5,8 +5,8 @@ import UIKit
 public class AuthsignalPush {
   private let api: PushAPIClient
 
-  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
-    api = PushAPIClient(tenantID: tenantID, baseURL: baseURL, deviceID: deviceID)
+  public init(tenantID: String, baseURL: String) {
+    api = PushAPIClient(tenantID: tenantID, baseURL: baseURL)
   }
 
   public func getCredential() async -> AuthsignalResponse<PushCredential> {

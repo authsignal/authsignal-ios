@@ -7,8 +7,8 @@ public class AuthsignalPasskey {
   private let passkeyManager: PasskeyManager
   private let passkeyLocalKey = "@as_passkey_credential_id"
 
-  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
-    api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL, deviceID: deviceID)
+  public init(tenantID: String, baseURL: String) {
+    api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL)
     passkeyManager = PasskeyManager()
   }
 

@@ -3,12 +3,10 @@ import Foundation
 class BaseAPIClient {
   let baseURL: String
   let basicAuth: String
-  let deviceID: String?
 
-  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
+  public init(tenantID: String, baseURL: String) {
     self.baseURL = baseURL
     self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
-    self.deviceID = deviceID
   }
 
   func challenge(action: String) async -> AuthsignalResponse<ChallengeResponse> {
