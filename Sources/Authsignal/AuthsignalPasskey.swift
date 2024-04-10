@@ -7,8 +7,8 @@ public class AuthsignalPasskey {
   private let passkeyManager: PasskeyManager
   private let passkeyLocalKey = "@as_passkey_credential_id"
 
-  public init(tenantID: String, baseURL: String) {
-    api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
+    api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL, deviceID: deviceID)
     passkeyManager = PasskeyManager()
   }
 
@@ -49,7 +49,7 @@ public class AuthsignalPasskey {
     return AuthsignalResponse(data: resultToken)
   }
 
-  public func signIn(token: String? = nil, autofill: Bool = false) async -> AuthsignalResponse<String> {
+  public func signIn(token: String? = nil, action: String? = nil, autofill: Bool = false) async -> AuthsignalResponse<String> {
     if (token != nil && autofill) {
       let error = "autofill is not supported when providing a token"
       
@@ -58,7 +58,19 @@ public class AuthsignalPasskey {
       return AuthsignalResponse(error: error)
     }
     
-    let optsResponse = await api.authenticationOptions(token: token)
+    if (token != nil && action != nil) {
+      let error = "action is not supported when providing a token"
+      
+      Logger.error("Error: \(error)")
+      
+      return AuthsignalResponse(error: error)
+    }
+    
+    let challengeResponse = action != nil ? await api.challenge(action: action!) : nil
+    
+    let challengeID = challengeResponse?.data?.challengeId
+    
+    let optsResponse = await api.authenticationOptions(token: token, challengeID: challengeID)
 
     guard let optsData = optsResponse.data else {
       return AuthsignalResponse(error: optsResponse.error ?? "authentication options error")

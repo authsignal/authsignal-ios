@@ -3,10 +3,20 @@ import Foundation
 class BaseAPIClient {
   let baseURL: String
   let basicAuth: String
+  let deviceID: String?
 
-  public init(tenantID: String, baseURL: String) {
+  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
     self.baseURL = baseURL
     self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
+    self.deviceID = deviceID
+  }
+
+  func challenge(action: String) async -> AuthsignalResponse<ChallengeResponse> {
+    let url = "\(baseURL)/client/challenge"
+
+    let body = ChallengeRequest(action: action)
+
+    return await postRequest(url: url, body: body)
   }
 
   func getRequest<T: Decodable>(url: String, token: String? = nil) async -> AuthsignalResponse<T> {
@@ -85,5 +95,19 @@ class BaseAPIClient {
 
       return AuthsignalResponse(error: error.localizedDescription)
     }
+  }
+  
+  lazy var defaultDeviceID = {
+    let defaultDeviceLocalKey = "@as_device_id"
+    
+    if let defaultDeviceID = UserDefaults.standard.string(forKey: defaultDeviceLocalKey) {
+      return defaultDeviceID
+    }
+    
+    let newDefaultDeviceID = UUID().uuidString
+    
+    UserDefaults.standard.set(newDefaultDeviceID, forKey: defaultDeviceLocalKey)
+    
+    return newDefaultDeviceID
   }
 }
