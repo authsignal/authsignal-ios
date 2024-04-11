@@ -70,7 +70,7 @@ public class AuthsignalPasskey {
     
     let challengeID = challengeResponse?.data?.challengeId
     
-    let optsResponse = await api.authenticationOptions(token: token, challengeID: challengeID)
+    let optsResponse = await api.authenticationOptions(challengeID: challengeID, token: token)
 
     guard let optsData = optsResponse.data else {
       return AuthsignalResponse(error: optsResponse.error ?? "authentication options error")
