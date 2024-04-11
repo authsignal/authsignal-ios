@@ -14,12 +14,12 @@ class PasskeyAPIClient: BaseAPIClient {
   }
 
   func authenticationOptions(
-    userName: String? = nil,
+    challengeID: String? = nil,
     token: String? = nil
   ) async -> AuthsignalResponse<AuthenticationOptsResponse> {
     let url = "\(baseURL)/client/user-authenticators/passkey/authentication-options"
   
-    let body = AuthenticationOptsRequest(username: userName)
+    let body = AuthenticationOptsRequest(challengeId: challengeID)
 
     return await postRequest(url: url, body: body, token: token)
   }
@@ -48,7 +48,8 @@ class PasskeyAPIClient: BaseAPIClient {
 
     let body = VerifyRequest(
       challengeId: challengeID,
-      authenticationCredential: credential
+      authenticationCredential: credential,
+      deviceId: defaultDeviceID()
     )
 
     return await postRequest(url: url, body: body, token: token)

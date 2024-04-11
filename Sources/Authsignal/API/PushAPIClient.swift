@@ -40,7 +40,7 @@ class PushAPIClient: BaseAPIClient {
     return await postRequest(url: url, body: body)
   }
 
-  public func getChallenge(publicKey: String) async -> AuthsignalResponse<ChallengeResponse> {
+  public func getChallenge(publicKey: String) async -> AuthsignalResponse<PushChallengeResponse> {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
     let url = "\(baseURL)/client/user-authenticators/push/challenge?publicKey=\(encodedKey)"

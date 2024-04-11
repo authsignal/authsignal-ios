@@ -9,6 +9,14 @@ class BaseAPIClient {
     self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
   }
 
+  func challenge(action: String) async -> AuthsignalResponse<ChallengeResponse> {
+    let url = "\(baseURL)/client/challenge"
+
+    let body = ChallengeRequest(action: action)
+
+    return await postRequest(url: url, body: body)
+  }
+
   func getRequest<T: Decodable>(url: String, token: String? = nil) async -> AuthsignalResponse<T> {
     var request = URLRequest(url: URL(string: url)!)
 
@@ -85,5 +93,19 @@ class BaseAPIClient {
 
       return AuthsignalResponse(error: error.localizedDescription)
     }
+  }
+  
+  lazy var defaultDeviceID = {
+    let defaultDeviceLocalKey = "@as_device_id"
+    
+    if let defaultDeviceID = UserDefaults.standard.string(forKey: defaultDeviceLocalKey) {
+      return defaultDeviceID
+    }
+    
+    let newDefaultDeviceID = UUID().uuidString
+    
+    UserDefaults.standard.set(newDefaultDeviceID, forKey: defaultDeviceLocalKey)
+    
+    return newDefaultDeviceID
   }
 }

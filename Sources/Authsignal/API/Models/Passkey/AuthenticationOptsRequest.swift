@@ -1,3 +1,3 @@
 public struct AuthenticationOptsRequest: Codable {
-  public let username: String?
+  public let challengeId: String?
 }
