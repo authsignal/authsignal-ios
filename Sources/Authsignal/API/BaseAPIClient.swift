@@ -65,18 +65,23 @@ class BaseAPIClient {
       {
         let error = json?["error"] as? String
         let errorMessage = json?["message"] as? String
+        let errorDescription = json?["errorDescription"] as? String
         
         if let error = error {
           Logger.error("Error: \(error)")
         }
 
         if let errorMessage = errorMessage {
-          Logger.error("Error description: \(errorMessage)")
+          Logger.error("Error message: \(errorMessage)")
+        }
+
+        if let errorDescription = errorDescription {
+          Logger.error("Error description: \(errorDescription)")
         }
         
         let rawError = String(data: data, encoding: String.Encoding.utf8)
         
-        return AuthsignalResponse(error: errorMessage ?? error ?? rawError ?? "api error")
+        return AuthsignalResponse(error: errorDescription ?? errorMessage ?? error ?? rawError ?? "api error")
       }
 
       let decoder = JSONDecoder()
