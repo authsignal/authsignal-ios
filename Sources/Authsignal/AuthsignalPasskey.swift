@@ -12,7 +12,7 @@ public class AuthsignalPasskey {
     passkeyManager = PasskeyManager()
   }
 
-  public func signUp(token: String, userName: String? = nil, displayName: String? = nil) async -> AuthsignalResponse<String> {
+  public func signUp(token: String, userName: String? = nil, displayName: String? = nil) async -> AuthsignalResponse<SignUpResponse> {
     let optsResponse = await api.registrationOptions(token: token, userName: userName, displayName: displayName)
 
     guard let optsData = optsResponse.data else {
@@ -46,10 +46,12 @@ public class AuthsignalPasskey {
     
     UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
 
-    return AuthsignalResponse(data: resultToken)
+    let signUpResponse = SignUpResponse(token: resultToken)
+    
+    return AuthsignalResponse(data: signUpResponse)
   }
 
-  public func signIn(token: String? = nil, action: String? = nil, autofill: Bool = false) async -> AuthsignalResponse<String> {
+  public func signIn(token: String? = nil, action: String? = nil, autofill: Bool = false) async -> AuthsignalResponse<SignInResponse> {
     if (token != nil && autofill) {
       let error = "autofill is not supported when providing a token"
       
@@ -95,13 +97,24 @@ public class AuthsignalPasskey {
       credential: credential
     )
     
-    guard let resultToken = verifyResponse.data?.accessToken else {
+    guard let data = verifyResponse.data else {
       return AuthsignalResponse(error: verifyResponse.error ?? "verify error")
     }
     
-    UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
-
-    return AuthsignalResponse(data: resultToken)
+    let signInResponse = SignInResponse(
+      isVerified: data.isVerified,
+      token: data.accessToken,
+      userId: data.userId,
+      userAuthenticatorId: data.userAuthenticatorId,
+      userName: data.username,
+      userDisplayName: data.userDisplayName
+    )
+    
+    if (data.isVerified) {
+      UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
+    }
+    
+    return AuthsignalResponse(data: signInResponse)
   }
 
   public func cancel() {
