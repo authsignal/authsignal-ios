@@ -90,6 +90,10 @@ public class AuthsignalPasskey {
       preferImmediatelyAvailableCredentials: preferImmediatelyAvailableCredentials
     )
     
+    if let errorCode = credentialResponse.errorCode {
+      return AuthsignalResponse(errorCode: errorCode)
+    }
+    
     if let error = credentialResponse.error {
       return AuthsignalResponse(error: error)
     }
