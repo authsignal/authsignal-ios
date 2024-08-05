@@ -86,7 +86,8 @@ class PasskeyManager: NSObject {
   func auth(
     relyingPartyID: String,
     challenge: String,
-    autofill: Bool
+    autofill: Bool,
+    preferImmediatelyAvailableCredentials: Bool
   ) async -> AuthsignalResponse<PasskeyAuthenticationCredential>
   {
     guard #available(iOS 15.0, *) else {
@@ -107,22 +108,24 @@ class PasskeyManager: NSObject {
 
     let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
       relyingPartyIdentifier: relyingPartyID)
-
+  
     let request = provider.createCredentialAssertionRequest(challenge: challengeData)
-
+    
     let controller = ASAuthorizationController(authorizationRequests: [request])
 
     controller.delegate = self
     controller.presentationContextProvider = self
 
     self.controller = controller
-
+    
     do {
       let authorization = try await withCheckedThrowingContinuation { continuation in
         self.continuation = continuation
 
         if #available(iOS 16.0, *), autofill {
           controller.performAutoFillAssistedRequests()
+        } else if #available(iOS 16.0, *), preferImmediatelyAvailableCredentials {
+          controller.performRequests(options: .preferImmediatelyAvailableCredentials)
         } else {
           controller.performRequests()
         }

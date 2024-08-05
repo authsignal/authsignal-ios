@@ -51,7 +51,12 @@ public class AuthsignalPasskey {
     return AuthsignalResponse(data: signUpResponse)
   }
 
-  public func signIn(token: String? = nil, action: String? = nil, autofill: Bool = false) async -> AuthsignalResponse<SignInResponse> {
+  public func signIn(
+    token: String? = nil,
+    action: String? = nil,
+    autofill: Bool = false,
+    preferImmediatelyAvailableCredentials: Bool = true
+  ) async -> AuthsignalResponse<SignInResponse> {
     if (token != nil && autofill) {
       let error = "autofill is not supported when providing a token"
       
@@ -81,7 +86,8 @@ public class AuthsignalPasskey {
     let credentialResponse = await passkeyManager.auth(
       relyingPartyID: optsData.options.rpId,
       challenge: optsData.options.challenge,
-      autofill: autofill
+      autofill: autofill,
+      preferImmediatelyAvailableCredentials: preferImmediatelyAvailableCredentials
     )
     
     if let error = credentialResponse.error {
