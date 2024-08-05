@@ -157,12 +157,20 @@ class PasskeyManager: NSObject {
       )
 
       return AuthsignalResponse(data: authenticationCredential)
+    } catch ASAuthorizationError.canceled {
+      self.controller = nil
+      self.continuation = nil
+      
+      Logger.error("Authentication canceled")
+      
+      return AuthsignalResponse(errorCode: .canceled)
+      
     } catch {
       self.controller = nil
       self.continuation = nil
       
       Logger.error("Authentication error: \(error)")
-      
+
       return AuthsignalResponse(error: error.localizedDescription)
     }
   }
