@@ -1,10 +1,10 @@
 import Foundation
 
-class PushAPIClient: BaseAPIClient {
+class PushApiClient: BaseApiClient {
   func getCredential(publicKey: String) async -> AuthsignalResponse<CredentialResponse> {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
-    let url = "\(baseURL)/client/user-authenticators/push?publicKey=\(encodedKey)"
+    let url = "\(baseUrl)/client/user-authenticators/push?publicKey=\(encodedKey)"
 
     return await getRequest(url: url)
   }
@@ -15,7 +15,7 @@ class PushAPIClient: BaseAPIClient {
     deviceName: String
   ) async -> AuthsignalResponse<AddCredentialResponse>
   {
-    let url = "\(baseURL)/client/user-authenticators/push"
+    let url = "\(baseUrl)/client/user-authenticators/push"
 
     let body = AddCredentialRequest(
       publicKey: publicKey,
@@ -30,7 +30,7 @@ class PushAPIClient: BaseAPIClient {
     publicKey: String,
     signature: String
   ) async -> AuthsignalResponse<RemoveCredentialResponse> {
-    let url = "\(baseURL)/client/user-authenticators/push/remove"
+    let url = "\(baseUrl)/client/user-authenticators/push/remove"
 
     let body = RemoveCredentialRequest(
       publicKey: publicKey,
@@ -43,22 +43,22 @@ class PushAPIClient: BaseAPIClient {
   public func getChallenge(publicKey: String) async -> AuthsignalResponse<PushChallengeResponse> {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
-    let url = "\(baseURL)/client/user-authenticators/push/challenge?publicKey=\(encodedKey)"
+    let url = "\(baseUrl)/client/user-authenticators/push/challenge?publicKey=\(encodedKey)"
 
     return await getRequest(url: url)
   }
 
   public func updateChallenge(
-    challengeID: String,
+    challengeId: String,
     publicKey: String,
     signature: String,
     approved: Bool,
     verificationCode: String?
   ) async -> AuthsignalResponse<UpdateChallengeResponse> {
-    let url = "\(baseURL)/client/user-authenticators/push/challenge"
+    let url = "\(baseUrl)/client/user-authenticators/push/challenge"
 
     let body = UpdateChallengeRequest(
-      challengeId: challengeID,
+      challengeId: challengeId,
       publicKey: publicKey,
       approved: approved,
       signature: signature,

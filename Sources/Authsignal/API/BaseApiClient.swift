@@ -1,16 +1,16 @@
 import Foundation
 
-class BaseAPIClient {
-  let baseURL: String
+class BaseApiClient {
+  let baseUrl: String
   let basicAuth: String
 
-  public init(tenantID: String, baseURL: String) {
-    self.baseURL = baseURL
-    self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
+  public init(tenantId: String, baseUrl: String) {
+    self.baseUrl = baseUrl
+    self.basicAuth = "Basic \(Data( "\(tenantId):".utf8).base64URLEncodedString())"
   }
 
   func challenge(action: String) async -> AuthsignalResponse<ChallengeResponse> {
-    let url = "\(baseURL)/client/challenge"
+    let url = "\(baseUrl)/client/challenge"
 
     let body = ChallengeRequest(action: action)
 
@@ -109,17 +109,17 @@ class BaseAPIClient {
     }
   }
   
-  lazy var defaultDeviceID = {
+  lazy var defaultDeviceId = {
     let defaultDeviceLocalKey = "@as_device_id"
     
-    if let defaultDeviceID = UserDefaults.standard.string(forKey: defaultDeviceLocalKey) {
-      return defaultDeviceID
+    if let defaultDeviceId = UserDefaults.standard.string(forKey: defaultDeviceLocalKey) {
+      return defaultDeviceId
     }
     
-    let newDefaultDeviceID = UUID().uuidString
+    let newDefaultDeviceId = UUID().uuidString
     
-    UserDefaults.standard.set(newDefaultDeviceID, forKey: defaultDeviceLocalKey)
+    UserDefaults.standard.set(newDefaultDeviceId, forKey: defaultDeviceLocalKey)
     
-    return newDefaultDeviceID
+    return newDefaultDeviceId
   }
 }

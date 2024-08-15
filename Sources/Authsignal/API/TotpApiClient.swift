@@ -1,17 +1,17 @@
 import Foundation
 
-class TOTPAPIClient: BaseAPIClient {
-  func enrollTOTP(token: String) async -> AuthsignalResponse<EnrollTOTPResponse> {
-    let url = "\(baseURL)/client/user-authenticators/totp"
+class TotpApiClient: BaseApiClient {
+  func enrollTotp(token: String) async -> AuthsignalResponse<EnrollTotpResponse> {
+    let url = "\(baseUrl)/client/user-authenticators/totp"
 
     return await postRequest(url: url, token: token)
   }
   
-  func verifyTOTP(
+  func verifyTotp(
     token: String,
     code: String
   ) async -> AuthsignalResponse<VerifyResponse> {
-    let url = "\(baseURL)/client/verify/totp"
+    let url = "\(baseUrl)/client/verify/totp"
 
     let body = VerifyRequest(verificationCode: code)
 
