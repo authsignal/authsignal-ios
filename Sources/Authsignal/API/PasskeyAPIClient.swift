@@ -3,12 +3,12 @@ import Foundation
 class PasskeyAPIClient: BaseAPIClient {
   func registrationOptions(
     token: String,
-    userName: String? = nil,
+    username: String? = nil,
     displayName: String? = nil
   ) async -> AuthsignalResponse<RegistrationOptsResponse> {
     let url = "\(baseURL)/client/user-authenticators/passkey/registration-options"
 
-    let body = RegistrationOptsRequest(username: userName, displayName: displayName)
+    let body = RegistrationOptsRequest(username: username, displayName: displayName)
 
     return await postRequest(url: url, body: body, token: token)
   }

@@ -3,6 +3,6 @@ public struct SignInResponse {
   public let token: String?
   public let userId: String?
   public let userAuthenticatorId: String?
-  public let userName: String?
+  public let username: String?
   public let userDisplayName: String?
 }
