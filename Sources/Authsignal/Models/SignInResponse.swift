@@ -4,5 +4,5 @@ public struct SignInResponse {
   public let userID: String?
   public let userAuthenticatorID: String?
   public let username: String?
-  public let userDisplayName: String?
+  public let displayName: String?
 }

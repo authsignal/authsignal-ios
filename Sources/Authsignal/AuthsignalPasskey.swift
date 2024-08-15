@@ -117,7 +117,7 @@ public class AuthsignalPasskey {
       userID: data.userId,
       userAuthenticatorID: data.userAuthenticatorId,
       username: data.username,
-      userDisplayName: data.userDisplayName
+      displayName: data.userDisplayName
     )
     
     if (data.isVerified) {
