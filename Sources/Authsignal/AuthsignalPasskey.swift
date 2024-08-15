@@ -3,12 +3,12 @@ import Security
 import UIKit
 
 public class AuthsignalPasskey {
-  private let api: PasskeyApiClient
+  private let api: PasskeyAPIClient
   private let passkeyManager: PasskeyManager
   private let passkeyLocalKey = "@as_passkey_credential_id"
 
-  public init(tenantId: String, baseUrl: String) {
-    api = PasskeyApiClient(tenantId: tenantId, baseUrl: baseUrl)
+  public init(tenantID: String, baseURL: String) {
+    api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL)
     passkeyManager = PasskeyManager()
   }
 
@@ -35,7 +35,7 @@ public class AuthsignalPasskey {
     }
 
     let addAuthenticatorResponse = await api.addAuthenticator(
-      challengeId: optsData.challengeId,
+      challengeID: optsData.challengeId,
       credential: credential,
       token: token
     )
@@ -75,9 +75,9 @@ public class AuthsignalPasskey {
     
     let challengeResponse = action != nil ? await api.challenge(action: action!) : nil
     
-    let challengeId = challengeResponse?.data?.challengeId
+    let challengeID = challengeResponse?.data?.challengeId
     
-    let optsResponse = await api.authenticationOptions(challengeId: challengeId, token: token)
+    let optsResponse = await api.authenticationOptions(challengeID: challengeID, token: token)
 
     guard let optsData = optsResponse.data else {
       return AuthsignalResponse(error: optsResponse.error ?? "authentication options error")
@@ -103,7 +103,7 @@ public class AuthsignalPasskey {
     }
 
     let verifyResponse = await api.verify(
-      challengeId: optsData.challengeId,
+      challengeID: optsData.challengeId,
       credential: credential
     )
     
@@ -136,7 +136,7 @@ public class AuthsignalPasskey {
       return AuthsignalResponse(data: false)
     }
     
-    let passkeyAuthenticatorResponse = await api.getPasskeyAuthenticator(credentialId: credentialId)
+    let passkeyAuthenticatorResponse = await api.getPasskeyAuthenticator(credentialID: credentialId)
     
     if let error = passkeyAuthenticatorResponse.error {
       return AuthsignalResponse(data: false, error: error)

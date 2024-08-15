@@ -1,12 +1,12 @@
 import Foundation
 
-class PasskeyApiClient: BaseApiClient {
+class PasskeyAPIClient: BaseAPIClient {
   func registrationOptions(
     token: String,
     userName: String? = nil,
     displayName: String? = nil
   ) async -> AuthsignalResponse<RegistrationOptsResponse> {
-    let url = "\(baseUrl)/client/user-authenticators/passkey/registration-options"
+    let url = "\(baseURL)/client/user-authenticators/passkey/registration-options"
 
     let body = RegistrationOptsRequest(username: userName, displayName: displayName)
 
@@ -14,25 +14,25 @@ class PasskeyApiClient: BaseApiClient {
   }
 
   func authenticationOptions(
-    challengeId: String? = nil,
+    challengeID: String? = nil,
     token: String? = nil
   ) async -> AuthsignalResponse<AuthenticationOptsResponse> {
-    let url = "\(baseUrl)/client/user-authenticators/passkey/authentication-options"
+    let url = "\(baseURL)/client/user-authenticators/passkey/authentication-options"
   
-    let body = AuthenticationOptsRequest(challengeId: challengeId)
+    let body = AuthenticationOptsRequest(challengeId: challengeID)
 
     return await postRequest(url: url, body: body, token: token)
   }
 
   func addAuthenticator(
-    challengeId: String,
+    challengeID: String,
     credential: PasskeyRegistrationCredential,
     token: String
   ) async -> AuthsignalResponse<AddPasskeyAuthenticatorResponse> {
-    let url = "\(baseUrl)/client/user-authenticators/passkey"
+    let url = "\(baseURL)/client/user-authenticators/passkey"
 
     let body = AddPasskeyAuthenticatorRequest(
-      challengeId: challengeId,
+      challengeId: challengeID,
       registrationCredential: credential
     )
 
@@ -40,25 +40,25 @@ class PasskeyApiClient: BaseApiClient {
   }
 
   func verify(
-    challengeId: String,
+    challengeID: String,
     credential: PasskeyAuthenticationCredential,
     token: String? = nil
   ) async -> AuthsignalResponse<VerifyPasskeyResponse> {
-    let url = "\(baseUrl)/client/verify/passkey"
+    let url = "\(baseURL)/client/verify/passkey"
 
     let body = VerifyPasskeyRequest(
-      challengeId: challengeId,
+      challengeId: challengeID,
       authenticationCredential: credential,
-      deviceId: defaultDeviceId()
+      deviceId: defaultDeviceID()
     )
 
     return await postRequest(url: url, body: body, token: token)
   }
   
   func getPasskeyAuthenticator(
-    credentialId: String
+    credentialID: String
   ) async -> AuthsignalResponse<PasskeyAuthenticatorResponse> {
-    let url = "\(baseUrl)/client/user-authenticators/passkey?credentialId=\(credentialId)"
+    let url = "\(baseURL)/client/user-authenticators/passkey?credentialId=\(credentialID)"
 
     return await getRequest(url: url)
   }

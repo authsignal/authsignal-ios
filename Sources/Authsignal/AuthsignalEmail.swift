@@ -3,10 +3,10 @@ import Security
 import UIKit
 
 public class AuthsignalEmail: AuthsignalBase {
-  private let api: EmailApiClient
+  private let api: EmailAPIClient
 
-  public init(tenantId: String, baseUrl: String) {
-    api = EmailApiClient(tenantId: tenantId, baseUrl: baseUrl)
+  public init(tenantID: String, baseURL: String) {
+    api = EmailAPIClient(tenantID: tenantID, baseURL: baseURL)
   }
 
   public func enroll(email: String) async -> AuthsignalResponse<EnrollResponse> {

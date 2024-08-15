@@ -3,10 +3,10 @@ import Security
 import UIKit
 
 public class AuthsignalPush {
-  private let api: PushApiClient
+  private let api: PushAPIClient
 
-  public init(tenantId: String, baseUrl: String) {
-    api = PushApiClient(tenantId: tenantId, baseUrl: baseUrl)
+  public init(tenantID: String, baseURL: String) {
+    api = PushAPIClient(tenantID: tenantID, baseURL: baseURL)
   }
 
   public func getCredential() async -> AuthsignalResponse<PushCredential> {
@@ -33,7 +33,7 @@ public class AuthsignalPush {
     }
 
     let credential = PushCredential(
-      credentialId: data.userAuthenticatorId,
+      credentialID: data.userAuthenticatorId,
       createdAt: data.verifiedAt,
       lastAuthenticatedAt: data.lastVerifiedAt
     )
@@ -120,7 +120,7 @@ public class AuthsignalPush {
   }
 
   public func updateChallenge(
-    challengeId: String,
+    challengeID: String,
     approved: Bool,
     verificationCode: String? = nil
   ) async -> AuthsignalResponse<Bool> {
@@ -139,13 +139,13 @@ public class AuthsignalPush {
     var signature: String? = nil
 
     do {
-      signature = try Signature.sign(message: challengeId, privateKey: secKey)
+      signature = try Signature.sign(message: challengeID, privateKey: secKey)
     } catch {
       return AuthsignalResponse(error: "Error generating signature. \(error)")
     }
 
     let response = await api.updateChallenge(
-      challengeId: challengeId,
+      challengeID: challengeID,
       publicKey: publicKey,
       signature: signature!,
       approved: approved,

@@ -6,15 +6,15 @@ public class Authsignal {
   public let email: AuthsignalEmail
   public let passkey: AuthsignalPasskey
   public let push: AuthsignalPush
-  public let sms: AuthsignalSms
-  public let totp: AuthsignalTotp
+  public let sms: AuthsignalSMS
+  public let totp: AuthsignalTOTP
 
-  public init(tenantId: String, baseUrl: String) {
-    email = AuthsignalEmail(tenantId: tenantId, baseUrl: baseUrl)
-    passkey = AuthsignalPasskey(tenantId: tenantId, baseUrl: baseUrl)
-    push = AuthsignalPush(tenantId: tenantId, baseUrl: baseUrl)
-    sms = AuthsignalSms(tenantId: tenantId, baseUrl: baseUrl)
-    totp = AuthsignalTotp(tenantId: tenantId, baseUrl: baseUrl)
+  public init(tenantID: String, baseURL: String) {
+    email = AuthsignalEmail(tenantID: tenantID, baseURL: baseURL)
+    passkey = AuthsignalPasskey(tenantID: tenantID, baseURL: baseURL)
+    push = AuthsignalPush(tenantID: tenantID, baseURL: baseURL)
+    sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL)
+    totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL)
   }
   
   public func setToken(token: String) {

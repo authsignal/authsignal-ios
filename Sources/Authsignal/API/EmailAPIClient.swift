@@ -1,11 +1,11 @@
 import Foundation
 
-class EmailApiClient: BaseApiClient {
+class EmailAPIClient: BaseAPIClient {
   func enrollEmail(
     token: String,
     email: String
   ) async -> AuthsignalResponse<EnrollResponse> {
-    let url = "\(baseUrl)/client/user-authenticators/email-otp"
+    let url = "\(baseURL)/client/user-authenticators/email-otp"
 
     let body = AddEmailAuthenticatorRequest(email: email)
 
@@ -15,7 +15,7 @@ class EmailApiClient: BaseApiClient {
   func challengeEmail(
     token: String
   ) async -> AuthsignalResponse<ChallengeResponse> {
-    let url = "\(baseUrl)/client/challenge/email-otp"
+    let url = "\(baseURL)/client/challenge/email-otp"
 
     return await postRequest(url: url, token: token)
   }
@@ -24,7 +24,7 @@ class EmailApiClient: BaseApiClient {
     token: String,
     code: String
   ) async -> AuthsignalResponse<VerifyResponse> {
-    let url = "\(baseUrl)/client/verify/email-otp"
+    let url = "\(baseURL)/client/verify/email-otp"
 
     let body = VerifyRequest(verificationCode: code)
 

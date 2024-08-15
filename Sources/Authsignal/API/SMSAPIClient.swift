@@ -1,30 +1,30 @@
 import Foundation
 
-class SmsApiClient: BaseApiClient {
-  func enrollSms(
+class SMSAPIClient: BaseAPIClient {
+  func enrollSMS(
     token: String,
     phoneNumber: String
   ) async -> AuthsignalResponse<EnrollResponse> {
-    let url = "\(baseUrl)/client/user-authenticators/sms"
+    let url = "\(baseURL)/client/user-authenticators/sms"
 
-    let body = AddSmsAuthenticatorRequest(phoneNumber: phoneNumber)
+    let body = AddSMSAuthenticatorRequest(phoneNumber: phoneNumber)
 
     return await postRequest(url: url, body: body, token: token)
   }
   
-  func challengeSms(
+  func challengeSMS(
     token: String
   ) async -> AuthsignalResponse<ChallengeResponse> {
-    let url = "\(baseUrl)/client/challenge/sms"
+    let url = "\(baseURL)/client/challenge/sms"
 
     return await postRequest(url: url, token: token)
   }
 
-  func verifySms(
+  func verifySMS(
     token: String,
     code: String
   ) async -> AuthsignalResponse<VerifyResponse> {
-    let url = "\(baseUrl)/client/verify/sms"
+    let url = "\(baseURL)/client/verify/sms"
 
     let body = VerifyRequest(verificationCode: code)
 
