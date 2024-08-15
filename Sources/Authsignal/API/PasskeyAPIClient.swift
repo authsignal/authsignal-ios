@@ -28,10 +28,10 @@ class PasskeyAPIClient: BaseAPIClient {
     challengeID: String,
     credential: PasskeyRegistrationCredential,
     token: String
-  ) async -> AuthsignalResponse<AddAuthenticatorResponse> {
+  ) async -> AuthsignalResponse<AddPasskeyAuthenticatorResponse> {
     let url = "\(baseURL)/client/user-authenticators/passkey"
 
-    let body = AddAuthenticatorRequest(
+    let body = AddPasskeyAuthenticatorRequest(
       challengeId: challengeID,
       registrationCredential: credential
     )
@@ -43,10 +43,10 @@ class PasskeyAPIClient: BaseAPIClient {
     challengeID: String,
     credential: PasskeyAuthenticationCredential,
     token: String? = nil
-  ) async -> AuthsignalResponse<VerifyResponse> {
+  ) async -> AuthsignalResponse<VerifyPasskeyResponse> {
     let url = "\(baseURL)/client/verify/passkey"
 
-    let body = VerifyRequest(
+    let body = VerifyPasskeyRequest(
       challengeId: challengeID,
       authenticationCredential: credential,
       deviceId: defaultDeviceID()
