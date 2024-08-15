@@ -114,8 +114,8 @@ public class AuthsignalPasskey {
     let signInResponse = SignInResponse(
       isVerified: data.isVerified,
       token: data.accessToken,
-      userID: data.userId,
-      userAuthenticatorID: data.userAuthenticatorId,
+      userId: data.userId,
+      userAuthenticatorId: data.userAuthenticatorId,
       username: data.username,
       displayName: data.userDisplayName
     )

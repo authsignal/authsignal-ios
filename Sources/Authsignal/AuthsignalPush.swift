@@ -33,7 +33,7 @@ public class AuthsignalPush {
     }
 
     let credential = PushCredential(
-      credentialID: data.userAuthenticatorId,
+      credentialId: data.userAuthenticatorId,
       createdAt: data.verifiedAt,
       lastAuthenticatedAt: data.lastVerifiedAt
     )
