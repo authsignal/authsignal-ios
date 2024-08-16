@@ -120,7 +120,7 @@ public class AuthsignalPush {
   }
 
   public func updateChallenge(
-    challengeID: String,
+    challengeId: String,
     approved: Bool,
     verificationCode: String? = nil
   ) async -> AuthsignalResponse<Bool> {
@@ -139,13 +139,13 @@ public class AuthsignalPush {
     var signature: String? = nil
 
     do {
-      signature = try Signature.sign(message: challengeID, privateKey: secKey)
+      signature = try Signature.sign(message: challengeId, privateKey: secKey)
     } catch {
       return AuthsignalResponse(error: "Error generating signature. \(error)")
     }
 
     let response = await api.updateChallenge(
-      challengeID: challengeID,
+      challengeId: challengeId,
       publicKey: publicKey,
       signature: signature!,
       approved: approved,

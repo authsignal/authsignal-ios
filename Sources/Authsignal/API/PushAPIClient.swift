@@ -49,7 +49,7 @@ class PushAPIClient: BaseAPIClient {
   }
 
   public func updateChallenge(
-    challengeID: String,
+    challengeId: String,
     publicKey: String,
     signature: String,
     approved: Bool,
@@ -58,7 +58,7 @@ class PushAPIClient: BaseAPIClient {
     let url = "\(baseURL)/client/user-authenticators/push/challenge"
 
     let body = UpdateChallengeRequest(
-      challengeId: challengeID,
+      challengeId: challengeId,
       publicKey: publicKey,
       approved: approved,
       signature: signature,
