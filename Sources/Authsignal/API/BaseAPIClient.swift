@@ -31,6 +31,15 @@ class BaseAPIClient {
     return await performRequest(request: request)
   }
 
+  func postRequest<T: Decodable>(url: String, token: String) async -> AuthsignalResponse<T> {
+    var request = URLRequest(url: URL(string: url)!)
+
+    request.httpMethod = "POST"
+    request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+    return await performRequest(request: request)
+  }
+  
   func postRequest<T: Decodable, TBody: Encodable>(url: String, body: TBody, token: String? = nil)
     async -> AuthsignalResponse<T>
   {
@@ -47,8 +56,8 @@ class BaseAPIClient {
 
     let encoder = JSONEncoder()
 
-    if let httpBody = try? encoder.encode(body) {
-      request.httpBody = httpBody
+    if let encodedBody = try? encoder.encode(body) {
+      request.httpBody = encodedBody
     }
 
     return await performRequest(request: request)

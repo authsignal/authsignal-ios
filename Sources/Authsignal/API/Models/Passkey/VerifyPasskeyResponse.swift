@@ -1,4 +1,4 @@
-public struct VerifyResponse: Codable {
+public struct VerifyPasskeyResponse: Codable {
   public let isVerified: Bool
   public let accessToken: String?
   public let userId: String?

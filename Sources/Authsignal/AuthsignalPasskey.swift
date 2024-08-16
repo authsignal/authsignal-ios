@@ -12,8 +12,8 @@ public class AuthsignalPasskey {
     passkeyManager = PasskeyManager()
   }
 
-  public func signUp(token: String, userName: String? = nil, displayName: String? = nil) async -> AuthsignalResponse<SignUpResponse> {
-    let optsResponse = await api.registrationOptions(token: token, userName: userName, displayName: displayName)
+  public func signUp(token: String, username: String? = nil, displayName: String? = nil) async -> AuthsignalResponse<SignUpResponse> {
+    let optsResponse = await api.registrationOptions(token: token, username: username, displayName: displayName)
 
     guard let optsData = optsResponse.data else {
       return AuthsignalResponse(error: optsResponse.error ?? "registration options error")
@@ -116,8 +116,8 @@ public class AuthsignalPasskey {
       token: data.accessToken,
       userId: data.userId,
       userAuthenticatorId: data.userAuthenticatorId,
-      userName: data.username,
-      userDisplayName: data.userDisplayName
+      username: data.username,
+      displayName: data.userDisplayName
     )
     
     if (data.isVerified) {
