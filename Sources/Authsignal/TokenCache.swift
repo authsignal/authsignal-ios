@@ -1,13 +1,9 @@
 import Foundation
-import Security
-import UIKit
 
-public class AuthsignalBase {
-  internal var token: String? = nil
+public class TokenCache {
+  public var token: String? = nil
   
-  public func setToken(token: String) {
-    self.token = token
-  }
+  static let shared = TokenCache()
   
   func handleTokenNotSetError<T: Decodable>() -> AuthsignalResponse<T> {
     let error = "A token has not been set. Call 'setToken' first."
@@ -17,4 +13,3 @@ public class AuthsignalBase {
     return AuthsignalResponse(error: error)
   }
 }
-
