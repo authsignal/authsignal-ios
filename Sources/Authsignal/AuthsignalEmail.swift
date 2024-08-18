@@ -4,11 +4,10 @@ import UIKit
 
 public class AuthsignalEmail {
   private let api: EmailAPIClient
-  private let cache: TokenCache
+  private let cache = TokenCache.shared
 
-  public init(tenantID: String, baseURL: String, cache: TokenCache) {
+  public init(tenantID: String, baseURL: String) {
     self.api = EmailAPIClient(tenantID: tenantID, baseURL: baseURL)
-    self.cache = cache
   }
 
   public func enroll(email: String) async -> AuthsignalResponse<EnrollResponse> {

@@ -4,11 +4,10 @@ import UIKit
 
 public class AuthsignalTOTP {
   private let api: TOTPAPIClient
-  private let cache: TokenCache
+  private let cache = TokenCache.shared
 
-  public init(tenantID: String, baseURL: String, cache: TokenCache) {
+  public init(tenantID: String, baseURL: String) {
     self.api = TOTPAPIClient(tenantID: tenantID, baseURL: baseURL)
-    self.cache = cache
   }
 
   public func enroll() async -> AuthsignalResponse<EnrollTOTPResponse> {

@@ -4,11 +4,10 @@ import UIKit
 
 public class AuthsignalSMS {
   private let api: SMSAPIClient
-  private let cache: TokenCache
+  private let cache = TokenCache.shared
   
-  public init(tenantID: String, baseURL: String, cache: TokenCache) {
+  public init(tenantID: String, baseURL: String) {
     self.api = SMSAPIClient(tenantID: tenantID, baseURL: baseURL)
-    self.cache = cache
   }
 
   public func enroll(phoneNumber: String) async -> AuthsignalResponse<EnrollResponse> {

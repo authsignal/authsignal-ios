@@ -8,21 +8,17 @@ public class Authsignal {
   public let push: AuthsignalPush
   public let sms: AuthsignalSMS
   public let totp: AuthsignalTOTP
-  
-  public let cache: TokenCache
 
   public init(tenantID: String, baseURL: String) {
-    cache = TokenCache.shared
-    
-    email = AuthsignalEmail(tenantID: tenantID, baseURL: baseURL, cache: cache)
-    sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL, cache: cache)
-    totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL, cache: cache)
+    email = AuthsignalEmail(tenantID: tenantID, baseURL: baseURL)
+    sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL)
+    totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL)
     
     passkey = AuthsignalPasskey(tenantID: tenantID, baseURL: baseURL)
     push = AuthsignalPush(tenantID: tenantID, baseURL: baseURL)
   }
   
   public func setToken(token: String) {
-    cache.token = token
+    TokenCache.shared.token = token
   }
 }
