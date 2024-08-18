@@ -18,8 +18,6 @@ public class Authsignal {
   }
   
   public func setToken(token: String) {
-    email.setToken(token: token)
-    sms.setToken(token: token)
-    totp.setToken(token: token)
+    TokenCache.shared.token = token
   }
 }
