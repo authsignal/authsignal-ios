@@ -11,11 +11,10 @@ public class Authsignal {
 
   public init(tenantID: String, baseURL: String) {
     email = AuthsignalEmail(tenantID: tenantID, baseURL: baseURL)
-    sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL)
-    totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL)
-    
     passkey = AuthsignalPasskey(tenantID: tenantID, baseURL: baseURL)
     push = AuthsignalPush(tenantID: tenantID, baseURL: baseURL)
+    sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL)
+    totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL)
   }
   
   public func setToken(token: String) {
