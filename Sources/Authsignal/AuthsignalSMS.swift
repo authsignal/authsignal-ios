@@ -25,6 +25,12 @@ public class AuthsignalSMS {
   public func verify(code: String) async -> AuthsignalResponse<VerifyResponse> {
     guard let token = cache.token else { return cache.handleTokenNotSetError() }
     
-    return await api.verifySMS(token: token, code: code)
+    let verifyResponse = await api.verifySMS(token: token, code: code)
+    
+    if let responseToken = verifyResponse.data?.token {
+      cache.token = responseToken
+    }
+    
+    return verifyResponse
   }
 }

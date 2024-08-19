@@ -6,14 +6,17 @@ public class AuthsignalPasskey {
   private let api: PasskeyAPIClient
   private let passkeyManager: PasskeyManager
   private let passkeyLocalKey = "@as_passkey_credential_id"
+  private let cache = TokenCache.shared
 
   public init(tenantID: String, baseURL: String) {
     api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL)
     passkeyManager = PasskeyManager()
   }
 
-  public func signUp(token: String, username: String? = nil, displayName: String? = nil) async -> AuthsignalResponse<SignUpResponse> {
-    let optsResponse = await api.registrationOptions(token: token, username: username, displayName: displayName)
+  public func signUp(token: String? = nil, username: String? = nil, displayName: String? = nil) async -> AuthsignalResponse<SignUpResponse> {
+    guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
+    
+    let optsResponse = await api.registrationOptions(token: userToken, username: username, displayName: displayName)
 
     guard let optsData = optsResponse.data else {
       return AuthsignalResponse(error: optsResponse.error ?? "registration options error")
@@ -37,7 +40,7 @@ public class AuthsignalPasskey {
     let addAuthenticatorResponse = await api.addAuthenticator(
       challengeID: optsData.challengeId,
       credential: credential,
-      token: token
+      token: userToken
     )
     
     guard let resultToken = addAuthenticatorResponse.data?.accessToken else {

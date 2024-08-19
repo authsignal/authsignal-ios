@@ -19,6 +19,12 @@ public class AuthsignalTOTP {
   public func verify(code: String) async -> AuthsignalResponse<VerifyResponse> {
     guard let token = cache.token else { return cache.handleTokenNotSetError() }
     
-    return await api.verifyTOTP(token: token, code: code)
+    let verifyResponse = await api.verifyTOTP(token: token, code: code)
+    
+    if let responseToken = verifyResponse.data?.token {
+      cache.token = responseToken
+    }
+    
+    return verifyResponse
   }
 }

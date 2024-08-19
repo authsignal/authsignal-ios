@@ -4,6 +4,7 @@ import UIKit
 
 public class AuthsignalPush {
   private let api: PushAPIClient
+  private let cache = TokenCache.shared
 
   public init(tenantID: String, baseURL: String) {
     api = PushAPIClient(tenantID: tenantID, baseURL: baseURL)
@@ -41,7 +42,9 @@ public class AuthsignalPush {
     return AuthsignalResponse(data: credential)
   }
 
-  public func addCredential(token: String) async -> AuthsignalResponse<Bool> {
+  public func addCredential(token: String? = nil) async -> AuthsignalResponse<Bool> {
+    guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
+    
     guard let publicKey = KeyManager.getOrCreatePublicKey() else {
       return AuthsignalResponse(error: "Unable to generate key pair")
     }
@@ -49,7 +52,7 @@ public class AuthsignalPush {
     let deviceName = await UIDevice.current.name
 
     let response = await api.addCredential(
-      token: token,
+      token: userToken,
       publicKey: publicKey,
       deviceName: deviceName
     )

@@ -163,7 +163,7 @@ class PasskeyManager: NSObject {
       
       Logger.error("Authentication canceled")
       
-      return AuthsignalResponse(errorCode: .canceled)
+      return AuthsignalResponse(errorCode: "SIGN_IN_CANCELED")
       
     } catch {
       self.controller = nil
