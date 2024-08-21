@@ -104,7 +104,7 @@ public class AuthsignalPush {
     return AuthsignalResponse(error: "Error removing authenticator")
   }
 
-  public func getChallenge() async -> AuthsignalResponse<String?> {
+  public func getChallenge() async -> AuthsignalResponse<PushChallenge?> {
     guard let publicKey = KeyManager.getPublicKey() else {
       return AuthsignalResponse(error: "Key pair not found")
     }
@@ -119,7 +119,20 @@ public class AuthsignalPush {
       return AuthsignalResponse(error: response.error)
     }
     
-    return AuthsignalResponse(data: data.challengeId)
+    guard let challengeId = data.challengeId else {
+      return AuthsignalResponse(data: nil)
+    }
+    
+    let pushChallenge = PushChallenge(
+      challengeId: challengeId,
+      actionCode: data.actionCode,
+      idempotencyKey: data.idempotencyKey,
+      deviceId: data.deviceId,
+      userAgent:data.userAgent,
+      ipAddress: data.ipAddress
+    )
+    
+    return AuthsignalResponse(data: pushChallenge)
   }
 
   public func updateChallenge(
