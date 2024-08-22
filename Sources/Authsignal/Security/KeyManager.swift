@@ -8,14 +8,14 @@ class KeyManager {
     return loadKey(name: keyName)
   }
 
-  static func getOrCreatePublicKey() -> String? {
+  static func getOrCreatePublicKey(keychainAccess: KeychainAccess) -> String? {
     let publicKey = getPublicKey()
 
     if publicKey != nil {
       return publicKey
     }
 
-    return createKeyPair()
+    return createKeyPair(keychainAccess: keychainAccess)
   }
 
   static func getPublicKey() -> String? {
@@ -26,10 +26,10 @@ class KeyManager {
     return derivePublicKey(secKey: secKey)
   }
 
-  static func createKeyPair() -> String? {
+  static func createKeyPair(keychainAccess: KeychainAccess) -> String? {
     let access = SecAccessControlCreateWithFlags(
       kCFAllocatorDefault,
-      kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+      getAccessibilitySecAttr(keychainAccess: keychainAccess),
       [.privateKeyUsage],
       nil)!
 
@@ -127,5 +127,20 @@ class KeyManager {
     ])
 
     return secp256r1Header + rawPublicKeyData
+  }
+  
+  private static func getAccessibilitySecAttr(keychainAccess: KeychainAccess) -> CFString {
+    switch keychainAccess {
+    case .afterFirstUnlock:
+      return kSecAttrAccessibleAfterFirstUnlock
+    case .afterFirstUnlockThisDeviceOnly:
+      return kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+    case .whenUnlockedThisDeviceOnly:
+      return kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+    case .whenUnlocked:
+      return kSecAttrAccessibleWhenUnlocked
+    case .whenPasscodeSetThisDeviceOnly:
+      return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
+    }
   }
 }
