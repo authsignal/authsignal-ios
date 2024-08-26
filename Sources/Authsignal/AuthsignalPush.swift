@@ -122,12 +122,13 @@ public class AuthsignalPush {
       return AuthsignalResponse(error: response.error)
     }
     
-    guard let challengeId = data.challengeId else {
+    guard let challengeId = data.challengeId, let userId = data.userId else {
       return AuthsignalResponse(data: nil)
     }
     
     let pushChallenge = PushChallenge(
       challengeId: challengeId,
+      userId: userId,
       actionCode: data.actionCode,
       idempotencyKey: data.idempotencyKey,
       deviceId: data.deviceId,
