@@ -43,13 +43,15 @@ public class AuthsignalPasskey {
       token: userToken
     )
     
-    guard let resultToken = addAuthenticatorResponse.data?.accessToken else {
+    guard let responseToken = addAuthenticatorResponse.data?.accessToken else {
       return AuthsignalResponse(error: addAuthenticatorResponse.error ?? "add authenticator error")
     }
     
     UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
 
-    let signUpResponse = SignUpResponse(token: resultToken)
+    cache.token = responseToken
+  
+    let signUpResponse = SignUpResponse(token: responseToken)
     
     return AuthsignalResponse(data: signUpResponse)
   }
@@ -125,6 +127,10 @@ public class AuthsignalPasskey {
     
     if (data.isVerified) {
       UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
+    }
+    
+    if let responseToken = data.accessToken {
+      cache.token = responseToken
     }
     
     return AuthsignalResponse(data: signInResponse)
