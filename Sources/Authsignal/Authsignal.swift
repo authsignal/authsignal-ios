@@ -18,6 +18,10 @@ public class Authsignal {
   }
   
   public func setToken(token: String) {
+    if (token.isEmpty) {
+      return
+    }
+    
     TokenCache.shared.token = token
   }
 }
