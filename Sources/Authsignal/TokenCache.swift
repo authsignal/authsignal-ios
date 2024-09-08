@@ -1,7 +1,16 @@
 import Foundation
 
 public class TokenCache {
-  public var token: String? = nil
+  private var _token: String? = nil
+  
+  public var token: String? {
+    get { return _token }
+    set {
+      if (!(newValue ?? "").isEmpty) {
+        _token = newValue
+      }
+    }
+  }
   
   public static let shared = TokenCache()
   
