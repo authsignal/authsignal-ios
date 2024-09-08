@@ -4,8 +4,12 @@ public class TokenCache {
   private var _token: String? = nil
   
   public var token: String? {
-    get { return (_token ?? "").isEmpty ? nil : _token }
-    set { _token = newValue }
+    get { return _token }
+    set {
+      if (!(newValue ?? "").isEmpty) {
+        _token = newValue
+      }
+    }
   }
   
   public static let shared = TokenCache()
