@@ -16,7 +16,7 @@ public class TokenCache {
   
   func handleTokenNotSetError<T: Decodable>() -> AuthsignalResponse<T> {
     let error = "A token has not been set. Call 'setToken' first."
-    let errorCode = "TOKEN_NOT_SET"
+    let errorCode = "token_not_set"
     
     Logger.error("Error: \(error)")
     

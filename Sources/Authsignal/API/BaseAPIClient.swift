@@ -72,25 +72,26 @@ class BaseAPIClient {
       if let httpResponse = response as? HTTPURLResponse,
         httpResponse.statusCode != 200
       {
-        let error = json?["error"] as? String
-        let errorMessage = json?["message"] as? String
-        let errorDescription = json?["errorDescription"] as? String
+        let responseError = json?["error"] as? String
+        let responseErrorCode = json?["errorCode"] as? String
+        let responseErrorDescription = json?["errorDescription"] as? String
         
-        if let error = error {
-          Logger.error("Error: \(error)")
+        if let responseError = responseError {
+          Logger.error("API response error: \(responseError)")
+        }
+        
+        if let responseErrorCode = responseErrorCode {
+          Logger.error("API response error code: \(responseErrorCode)")
         }
 
-        if let errorMessage = errorMessage {
-          Logger.error("Error message: \(errorMessage)")
-        }
-
-        if let errorDescription = errorDescription {
-          Logger.error("Error description: \(errorDescription)")
+        if let responseErrorDescription = responseErrorDescription {
+          Logger.error("API response error description: \(responseErrorDescription)")
         }
         
-        let rawError = String(data: data, encoding: String.Encoding.utf8)
+        let error = !(responseErrorDescription ?? "").isEmpty ? responseErrorDescription : responseError
+        let errorCode = responseErrorCode
         
-        return AuthsignalResponse(error: errorDescription ?? errorMessage ?? error ?? rawError ?? "api error")
+        return AuthsignalResponse(error: error ?? "unexpected_error", errorCode: errorCode)
       }
 
       let decoder = JSONDecoder()
@@ -100,10 +101,10 @@ class BaseAPIClient {
       if let decoded = decoded {
         return AuthsignalResponse(data: decoded)
       } else {
-        return AuthsignalResponse(error: "decoding error")
+        return AuthsignalResponse(error: "Decoding error.")
       }
     } catch {
-      Logger.error("Request error: \(error).")
+      Logger.error("API request error: \(error).")
 
       return AuthsignalResponse(error: error.localizedDescription)
     }

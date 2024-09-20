@@ -13,15 +13,15 @@ class PasskeyManager: NSObject {
   ) async -> AuthsignalResponse<PasskeyRegistrationCredential>
   {
     guard #available(iOS 15.0, *) else {
-      return AuthsignalResponse(error: "iOS version not supported")
+      return AuthsignalResponse(error: "iOS version not supported.")
     }
 
     guard let challengeData = Data(base64URLEncoded: challenge) else {
-      return AuthsignalResponse(error: "error encoding challenge")
+      return AuthsignalResponse(error: "Error encoding challenge.")
     }
     
     if self.continuation != nil || self.controller != nil {
-      return AuthsignalResponse(error: "credential registration already in progress")
+      return AuthsignalResponse(error: "Credential registration already in progress.")
     }
 
     let userData = Data(userID.utf8)
@@ -56,7 +56,7 @@ class PasskeyManager: NSObject {
         let credential = authorization.credential
           as? ASAuthorizationPlatformPublicKeyCredentialRegistration
       else {
-        return AuthsignalResponse(error: "error unwrapping credential")
+        return AuthsignalResponse(error: "Error unwrapping credential.")
       }
 
       let credentialId = credential.credentialID.base64URLEncodedString()
@@ -91,19 +91,19 @@ class PasskeyManager: NSObject {
   ) async -> AuthsignalResponse<PasskeyAuthenticationCredential>
   {
     guard #available(iOS 15.0, *) else {
-      return AuthsignalResponse(error: "iOS version not supported")
+      return AuthsignalResponse(error: "iOS version not supported.")
     }
     
     if autofill, #unavailable(iOS 16.0) {
-      return AuthsignalResponse(error: "iOS version not supported for autofill")
+      return AuthsignalResponse(error: "iOS version not supported for autofill.")
     }
 
     if self.continuation != nil || self.controller != nil {
-      return AuthsignalResponse(error: "credential assertion already in progress")
+      return AuthsignalResponse(error: "Credential assertion already in progress.")
     }
 
     guard let challengeData = Data(base64URLEncoded: challenge) else {
-      return AuthsignalResponse(error: "error encoding challenge")
+      return AuthsignalResponse(error: "Error encoding challenge.")
     }
 
     let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
@@ -138,7 +138,7 @@ class PasskeyManager: NSObject {
         let credential = authorization.credential
           as? ASAuthorizationPlatformPublicKeyCredentialAssertion
       else {
-        return AuthsignalResponse(error: "error unwrapping credential")
+        return AuthsignalResponse(error: "Error unwrapping credential.")
       }
 
       let credentialId = credential.credentialID.base64URLEncodedString()
@@ -161,15 +161,15 @@ class PasskeyManager: NSObject {
       self.controller = nil
       self.continuation = nil
       
-      Logger.error("Authentication canceled")
+      Logger.error("Passkey authentication canceled.")
       
-      return AuthsignalResponse(errorCode: "SIGN_IN_CANCELED")
+      return AuthsignalResponse(errorCode: "user_canceled")
       
     } catch {
       self.controller = nil
       self.continuation = nil
       
-      Logger.error("Authentication error: \(error)")
+      Logger.error("Passkey authentication error: \(error)")
 
       return AuthsignalResponse(error: error.localizedDescription)
     }
