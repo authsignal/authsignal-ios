@@ -19,7 +19,10 @@ public class AuthsignalPasskey {
     let optsResponse = await api.registrationOptions(token: userToken, username: username, displayName: displayName)
 
     guard let optsData = optsResponse.data else {
-      return AuthsignalResponse(error: optsResponse.error ?? "registration options error")
+      return AuthsignalResponse(
+        error: optsResponse.error ?? "Registration options error.",
+        errorCode: optsResponse.errorCode
+      )
     }
 
     let credentialResponse = await passkeyManager.register(
@@ -44,7 +47,10 @@ public class AuthsignalPasskey {
     )
     
     guard let responseToken = addAuthenticatorResponse.data?.accessToken else {
-      return AuthsignalResponse(error: addAuthenticatorResponse.error ?? "add authenticator error")
+      return AuthsignalResponse(
+        error: addAuthenticatorResponse.error ?? "Add authenticator error.",
+        errorCode: addAuthenticatorResponse.errorCode
+      )
     }
     
     UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
@@ -63,7 +69,7 @@ public class AuthsignalPasskey {
     preferImmediatelyAvailableCredentials: Bool = true
   ) async -> AuthsignalResponse<SignInResponse> {
     if (token != nil && autofill) {
-      let error = "autofill is not supported when providing a token"
+      let error = "Autofill is not supported when providing a token."
       
       Logger.error("Error: \(error)")
       
@@ -71,7 +77,7 @@ public class AuthsignalPasskey {
     }
     
     if (token != nil && action != nil) {
-      let error = "action is not supported when providing a token"
+      let error = "Action is not supported when providing a token."
       
       Logger.error("Error: \(error)")
       
@@ -85,7 +91,10 @@ public class AuthsignalPasskey {
     let optsResponse = await api.authenticationOptions(challengeID: challengeID, token: token)
 
     guard let optsData = optsResponse.data else {
-      return AuthsignalResponse(error: optsResponse.error ?? "authentication options error")
+      return AuthsignalResponse(
+        error: optsResponse.error ?? "Authentication options error.",
+        errorCode: optsResponse.errorCode
+      )
     }
 
     let credentialResponse = await passkeyManager.auth(
@@ -96,7 +105,7 @@ public class AuthsignalPasskey {
     )
     
     if let errorCode = credentialResponse.errorCode {
-      return AuthsignalResponse(errorCode: errorCode)
+      return AuthsignalResponse(error: "Credential response error.", errorCode: errorCode)
     }
     
     if let error = credentialResponse.error {
@@ -113,7 +122,10 @@ public class AuthsignalPasskey {
     )
     
     guard let data = verifyResponse.data else {
-      return AuthsignalResponse(error: verifyResponse.error ?? "verify error")
+      return AuthsignalResponse(
+        error: verifyResponse.error ?? "Verify error.",
+        errorCode: verifyResponse.errorCode
+      )
     }
     
     let signInResponse = SignInResponse(
@@ -148,7 +160,11 @@ public class AuthsignalPasskey {
     let passkeyAuthenticatorResponse = await api.getPasskeyAuthenticator(credentialID: credentialId)
     
     if let error = passkeyAuthenticatorResponse.error {
-      return AuthsignalResponse(data: false, error: error)
+      return AuthsignalResponse(
+        data: false,
+        error: error,
+        errorCode: passkeyAuthenticatorResponse.errorCode
+      )
     } else {
       return AuthsignalResponse(data: true)
     }

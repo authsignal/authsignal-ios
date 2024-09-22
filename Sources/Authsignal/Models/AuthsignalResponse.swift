@@ -5,7 +5,7 @@ public struct AuthsignalResponse<T> {
   public let error: String?
   public let errorCode: String?
   
-  init(data: T, error: String?) {
+  init(data: T, error: String?, errorCode: String? = nil) {
     self.data = data
     self.error = nil
     self.errorCode = nil
