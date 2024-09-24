@@ -94,17 +94,11 @@ public class AuthsignalPush {
 
     let response = await api.removeCredential(publicKey: publicKey, signature: signature!)
 
-    guard let data = response.data else {
-      return AuthsignalResponse(error: response.error)
-    }
-    
-    let success = data.removedAuthenticatorId != nil
-
-    if success {
-      return AuthsignalResponse(data: KeyManager.deleteKeyPair())
-    }
-
-    return AuthsignalResponse(error: "Error removing authenticator")
+    return AuthsignalResponse(
+      data: KeyManager.deleteKeyPair(),
+      error: response.error,
+      errorCode: response.errorCode
+    )
   }
 
   public func getChallenge() async -> AuthsignalResponse<PushChallenge?> {
