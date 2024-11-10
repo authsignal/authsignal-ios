@@ -98,7 +98,7 @@ class BaseAPIClient {
         let error = !(responseErrorDescription ?? "").isEmpty ? responseErrorDescription : responseError
         let errorCode = responseErrorCode
         
-        return AuthsignalResponse(error: error ?? "unexpected_error", errorCode: errorCode)
+        return AuthsignalResponse(error: error ?? "Unexpected error.", errorCode: errorCode)
       }
 
       let decoder = JSONDecoder()
@@ -113,7 +113,7 @@ class BaseAPIClient {
     } catch {
       Logger.error("API request error: \(error).")
 
-      return AuthsignalResponse(error: error.localizedDescription)
+      return AuthsignalResponse(error: error.localizedDescription, errorCode: "network_error")
     }
   }
   
