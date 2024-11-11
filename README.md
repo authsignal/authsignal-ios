@@ -9,7 +9,7 @@ Check out our [official iOS documentation](https://docs.authsignal.com/sdks/clie
 Add Authsignal to your Podfile:
 
 ```rb
-pod 'Authsignal', '~> 1.0.10'
+pod 'Authsignal', '~> 1.0.13'
 ```
 
 #### Swift Package Manager
