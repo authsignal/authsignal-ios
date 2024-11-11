@@ -166,11 +166,14 @@ public class AuthsignalPush {
       verificationCode: verificationCode
     )
     
-    return AuthsignalResponse(
-      data: response.data != nil,
-      error: response.error,
-      errorCode: response.errorCode
-    )
+    if let error = response.error {
+      return AuthsignalResponse(
+        error: error,
+        errorCode: response.errorCode
+      )
+    } else {
+      return AuthsignalResponse(data: response.data != nil)
+    }
   }
 
   private func getTimeBasedDataToSign() -> String {
