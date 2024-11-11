@@ -20,13 +20,13 @@ public class AuthsignalPush {
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
     guard let publicKey = publicKey else {
-      return AuthsignalResponse(error: "Error deriving public key")
+      return AuthsignalResponse(error: "Error deriving public key.")
     }
 
     let response = await api.getCredential(publicKey: publicKey)
 
     if let error = response.error {
-      return AuthsignalResponse(error: error)
+      return AuthsignalResponse(error: error, errorCode: response.errorCode)
     }
     
     guard let data = response.data else {
@@ -49,7 +49,7 @@ public class AuthsignalPush {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
     
     guard let publicKey = KeyManager.getOrCreatePublicKey(keychainAccess: keychainAccess) else {
-      return AuthsignalResponse(error: "Unable to generate key pair")
+      return AuthsignalResponse(error: "Unable to generate key pair.")
     }
 
     let deviceName = await UIDevice.current.name
@@ -61,7 +61,7 @@ public class AuthsignalPush {
     )
     
     guard let data = response.data else {
-      return AuthsignalResponse(error: response.error)
+      return AuthsignalResponse(error: response.error, errorCode: response.errorCode)
     }
     
     let success = data.userAuthenticatorId != nil
@@ -73,13 +73,13 @@ public class AuthsignalPush {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
-      return AuthsignalResponse(error: "Key pair not found")
+      return AuthsignalResponse(error: "Key pair not found.")
     }
 
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
     guard let publicKey = publicKey else {
-      return AuthsignalResponse(error: "Error deriving public key")
+      return AuthsignalResponse(error: "Error deriving public key.")
     }
 
     var signature: String? = nil
@@ -103,17 +103,17 @@ public class AuthsignalPush {
 
   public func getChallenge() async -> AuthsignalResponse<PushChallenge?> {
     guard let publicKey = KeyManager.getPublicKey() else {
-      return AuthsignalResponse(error: "Key pair not found")
+      return AuthsignalResponse(error: "Key pair not found.")
     }
 
     let response = await api.getChallenge(publicKey: publicKey)
 
     if let error = response.error {
-      return AuthsignalResponse(error: error)
+      return AuthsignalResponse(error: error, errorCode: response.errorCode)
     }
     
     guard let data = response.data else {
-      return AuthsignalResponse(error: response.error)
+      return AuthsignalResponse(error: response.error, errorCode: response.errorCode)
     }
     
     guard let challengeId = data.challengeId, let userId = data.userId else {
@@ -141,13 +141,13 @@ public class AuthsignalPush {
     let secKey = KeyManager.getKey()
 
     guard let secKey = secKey else {
-      return AuthsignalResponse(error: "Key pair not found")
+      return AuthsignalResponse(error: "Key pair not found.")
     }
 
     let publicKey = KeyManager.derivePublicKey(secKey: secKey)
 
     guard let publicKey = publicKey else {
-      return AuthsignalResponse(error: "Error deriving public key")
+      return AuthsignalResponse(error: "Error deriving public key.")
     }
 
     var signature: String? = nil
@@ -166,7 +166,11 @@ public class AuthsignalPush {
       verificationCode: verificationCode
     )
     
-    return AuthsignalResponse(data: response.data != nil, error: response.error)
+    return AuthsignalResponse(
+      data: response.data != nil,
+      error: response.error,
+      errorCode: response.errorCode
+    )
   }
 
   private func getTimeBasedDataToSign() -> String {
