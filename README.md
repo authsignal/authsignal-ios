@@ -1,3 +1,5 @@
+<img width="1070" alt="Authsignal" src="https://raw.githubusercontent.com/authsignal/authsignal-ios/main/.github/images/authsignal.png">
+
 # Authsignal iOS
 
 Check out our [official iOS documentation](https://docs.authsignal.com/sdks/client/ios).
