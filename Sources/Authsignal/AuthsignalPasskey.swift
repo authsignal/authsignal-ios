@@ -119,7 +119,7 @@ public class AuthsignalPasskey {
     let verifyResponse = await api.verify(
       challengeID: optsData.challengeId,
       credential: credential,
-      token: token,
+      token: token
     )
     
     guard let data = verifyResponse.data else {
