@@ -6,6 +6,7 @@ public class Authsignal {
   public let email: AuthsignalEmail
   public let passkey: AuthsignalPasskey
   public let push: AuthsignalPush
+  public let device: AuthsignalDevice
   public let sms: AuthsignalSMS
   public let totp: AuthsignalTOTP
 
@@ -13,6 +14,7 @@ public class Authsignal {
     email = AuthsignalEmail(tenantID: tenantID, baseURL: baseURL)
     passkey = AuthsignalPasskey(tenantID: tenantID, baseURL: baseURL)
     push = AuthsignalPush(tenantID: tenantID, baseURL: baseURL)
+    device = AuthsignalDevice(tenantID: tenantID, baseURL: baseURL)
     sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL)
     totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL)
   }
