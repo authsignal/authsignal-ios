@@ -1,7 +1,7 @@
 import Foundation
 
 class DeviceAPIClient: BaseAPIClient {
-  func getCredential(publicKey: String) async -> AuthsignalResponse<CredentialResponse> {
+  func getCredential(publicKey: String) async -> AuthsignalResponse<DeviceCredentialResponse> {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
     let url = "\(baseURL)/client/user-authenticators/device?publicKey=\(encodedKey)"
@@ -13,11 +13,11 @@ class DeviceAPIClient: BaseAPIClient {
     token: String,
     publicKey: String,
     deviceName: String
-  ) async -> AuthsignalResponse<AddCredentialResponse>
+  ) async -> AuthsignalResponse<AddDeviceCredentialResponse>
   {
     let url = "\(baseURL)/client/user-authenticators/device"
 
-    let body = AddCredentialRequest(
+    let body = AddDeviceCredentialRequest(
       publicKey: publicKey,
       deviceName: deviceName,
       devicePlatform: "ios"
@@ -29,10 +29,10 @@ class DeviceAPIClient: BaseAPIClient {
   func removeCredential(
     publicKey: String,
     signature: String
-  ) async -> AuthsignalResponse<RemoveCredentialResponse> {
+  ) async -> AuthsignalResponse<RemoveDeviceCredentialResponse> {
     let url = "\(baseURL)/client/user-authenticators/device/remove"
 
-    let body = RemoveCredentialRequest(
+    let body = RemoveDeviceCredentialRequest(
       publicKey: publicKey,
       signature: signature
     )
@@ -54,10 +54,10 @@ class DeviceAPIClient: BaseAPIClient {
     signature: String,
     approved: Bool,
     verificationCode: String?
-  ) async -> AuthsignalResponse<UpdateChallengeResponse> {
+  ) async -> AuthsignalResponse<UpdateDeviceChallengeResponse> {
     let url = "\(baseURL)/client/user-authenticators/device/challenge"
 
-    let body = UpdateChallengeRequest(
+    let body = UpdateDeviceChallengeRequest(
       challengeId: challengeId,
       publicKey: publicKey,
       approved: approved,
