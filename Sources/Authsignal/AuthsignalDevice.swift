@@ -133,6 +133,47 @@ public class AuthsignalDevice {
     return AuthsignalResponse(data: deviceChallenge)
   }
 
+  public func claimChallenge(
+    challengeId: String
+  ) async -> AuthsignalResponse<ClaimDeviceChallengeResponse> {
+    let secKey = KeyManager.getKey()
+
+    guard let secKey = secKey else {
+      return AuthsignalResponse(error: "Key pair not found.")
+    }
+
+    let publicKey = KeyManager.derivePublicKey(secKey: secKey)
+
+    guard let publicKey = publicKey else {
+      return AuthsignalResponse(error: "Error deriving public key.")
+    }
+
+    var signature: String? = nil
+
+    do {
+      signature = try Signature.sign(message: challengeId, privateKey: secKey)
+    } catch {
+      return AuthsignalResponse(error: "Error generating signature. \(error)")
+    }
+
+    let response = await api.claimChallenge(
+      challengeId: challengeId,
+      publicKey: publicKey,
+      signature: signature!
+    )
+    
+    if let error = response.error {
+      return AuthsignalResponse(
+        error: error,
+        errorCode: response.errorCode
+      )
+    } else if let data = response.data {
+      return AuthsignalResponse(data: data)
+    } else {
+      return AuthsignalResponse(error: "Claim challenge returned no data and no error.")
+    }
+  }
+
   public func updateChallenge(
     challengeId: String,
     approved: Bool,
