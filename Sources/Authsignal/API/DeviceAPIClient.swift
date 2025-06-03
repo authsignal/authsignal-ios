@@ -48,6 +48,22 @@ class DeviceAPIClient: BaseAPIClient {
     return await getRequest(url: url)
   }
 
+  public func claimChallenge(
+    challengeId: String,
+    publicKey: String,
+    signature: String
+  ) async -> AuthsignalResponse<ClaimDeviceChallengeResponse> {
+    let url = "\(baseURL)/client/user-authenticators/device/challenge/claim"
+
+    let body = ClaimDeviceChallengeRequest(
+      challengeId: challengeId,
+      publicKey: publicKey,
+      signature: signature
+    )
+
+    return await postRequest(url: url, body: body)
+  }
+
   public func updateChallenge(
     challengeId: String,
     publicKey: String,
