@@ -26,9 +26,9 @@ public class AuthsignalPasskey {
     }
 
     let credentialResponse = await passkeyManager.register(
-      relyingPartyID: optsData.options.rp.id,
+      relyingPartyId: optsData.options.rp.id,
       challenge: optsData.options.challenge,
-      userID: optsData.options.user.id,
+      userId: optsData.options.user.id,
       displayName: optsData.options.user.displayName
     )
     
@@ -41,7 +41,7 @@ public class AuthsignalPasskey {
     }
 
     let addAuthenticatorResponse = await api.addAuthenticator(
-      challengeID: optsData.challengeId,
+      challengeId: optsData.challengeId,
       credential: credential,
       token: userToken
     )
@@ -86,9 +86,9 @@ public class AuthsignalPasskey {
     
     let challengeResponse = action != nil ? await api.challenge(action: action!) : nil
     
-    let challengeID = challengeResponse?.data?.challengeId
+    let challengeId = challengeResponse?.data?.challengeId
     
-    let optsResponse = await api.authenticationOptions(challengeID: challengeID, token: token)
+    let optsResponse = await api.authenticationOptions(challengeId: challengeId, token: token)
 
     guard let optsData = optsResponse.data else {
       return AuthsignalResponse(
@@ -98,7 +98,7 @@ public class AuthsignalPasskey {
     }
 
     let credentialResponse = await passkeyManager.auth(
-      relyingPartyID: optsData.options.rpId,
+      relyingPartyId: optsData.options.rpId,
       challenge: optsData.options.challenge,
       autofill: autofill,
       preferImmediatelyAvailableCredentials: preferImmediatelyAvailableCredentials
@@ -117,7 +117,7 @@ public class AuthsignalPasskey {
     }
 
     let verifyResponse = await api.verify(
-      challengeID: optsData.challengeId,
+      challengeId: optsData.challengeId,
       credential: credential,
       token: token
     )
@@ -158,7 +158,7 @@ public class AuthsignalPasskey {
       return AuthsignalResponse(data: false)
     }
     
-    let passkeyAuthenticatorResponse = await api.getPasskeyAuthenticator(credentialID: credentialId)
+    let passkeyAuthenticatorResponse = await api.getPasskeyAuthenticator(credentialId: credentialId)
     
     if let error = passkeyAuthenticatorResponse.error {
       return AuthsignalResponse(

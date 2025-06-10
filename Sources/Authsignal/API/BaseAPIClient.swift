@@ -9,7 +9,7 @@ class BaseAPIClient {
     self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
   }
 
-  func challenge(action: String) async -> AuthsignalResponse<ChallengeResponse> {
+  func challenge(action: String? = nil) async -> AuthsignalResponse<ChallengeResponse> {
     let url = "\(baseURL)/client/challenge"
 
     let body = ChallengeRequest(action: action)

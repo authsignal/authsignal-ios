@@ -83,4 +83,20 @@ class DeviceAPIClient: BaseAPIClient {
 
     return await postRequest(url: url, body: body)
   }
+
+  public func verify(
+    challengeId: String,
+    publicKey: String,
+    signature: String,
+  ) async -> AuthsignalResponse<VerifyDeviceResponse> {
+    let url = "\(baseURL)/client/verify/device"
+
+    let body = VerifyDeviceRequest(
+      challengeId: challengeId,
+      publicKey: publicKey,
+      signature: signature
+    )
+
+    return await postRequest(url: url, body: body)
+  }
 } 
