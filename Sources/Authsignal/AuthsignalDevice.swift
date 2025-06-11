@@ -216,6 +216,49 @@ public class AuthsignalDevice {
       return AuthsignalResponse(data: response.data != nil)
     }
   }
+  
+  public func verify() async -> AuthsignalResponse<VerifyDeviceResponse> {
+    let challengeResponse = await api.challenge()
+    
+    guard let challengeId = challengeResponse.data?.challengeId else {
+      return AuthsignalResponse(error: "Error generating challenge.")
+    }
+    
+    let secKey = KeyManager.getKey()
+
+    guard let secKey = secKey else {
+      return AuthsignalResponse(error: "Key pair not found.")
+    }
+    
+    let publicKey = KeyManager.derivePublicKey(secKey: secKey)
+
+    guard let publicKey = publicKey else {
+      return AuthsignalResponse(error: "Error deriving public key.")
+    }
+    
+    var signature: String? = nil
+
+    do {
+      signature = try Signature.sign(message: challengeId, privateKey: secKey)
+    } catch {
+      return AuthsignalResponse(error: "Error generating signature. \(error)")
+    }
+
+    let response = await api.verify(
+      challengeId: challengeId,
+      publicKey: publicKey,
+      signature: signature!
+    )
+    
+    if let error = response.error {
+      return AuthsignalResponse(
+        error: error,
+        errorCode: response.errorCode
+      )
+    } else {
+      return AuthsignalResponse(data: response.data!)
+    }
+  }
 
   private func getTimeBasedDataToSign() -> String {
     let secondsSinceEpoch = Double(Date().timeIntervalSince1970)

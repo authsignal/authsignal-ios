@@ -6,9 +6,9 @@ class PasskeyManager: NSObject {
   private var controller: ASAuthorizationController?
 
   func register(
-    relyingPartyID: String,
+    relyingPartyId: String,
     challenge: String,
-    userID: String,
+    userId: String,
     displayName: String
   ) async -> AuthsignalResponse<PasskeyRegistrationCredential>
   {
@@ -24,10 +24,10 @@ class PasskeyManager: NSObject {
       return AuthsignalResponse(error: "Credential registration already in progress.")
     }
 
-    let userData = Data(userID.utf8)
+    let userData = Data(userId.utf8)
 
     let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
-      relyingPartyIdentifier: relyingPartyID)
+      relyingPartyIdentifier: relyingPartyId)
 
     let request = provider.createCredentialRegistrationRequest(
       challenge: challengeData,
@@ -84,7 +84,7 @@ class PasskeyManager: NSObject {
   }
 
   func auth(
-    relyingPartyID: String,
+    relyingPartyId: String,
     challenge: String,
     autofill: Bool,
     preferImmediatelyAvailableCredentials: Bool
@@ -107,7 +107,7 @@ class PasskeyManager: NSObject {
     }
 
     let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
-      relyingPartyIdentifier: relyingPartyID)
+      relyingPartyIdentifier: relyingPartyId)
   
     let request = provider.createCredentialAssertionRequest(challenge: challengeData)
     

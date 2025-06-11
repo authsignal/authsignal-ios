@@ -14,25 +14,25 @@ class PasskeyAPIClient: BaseAPIClient {
   }
 
   func authenticationOptions(
-    challengeID: String? = nil,
+    challengeId: String? = nil,
     token: String? = nil
   ) async -> AuthsignalResponse<AuthenticationOptsResponse> {
     let url = "\(baseURL)/client/user-authenticators/passkey/authentication-options"
   
-    let body = AuthenticationOptsRequest(challengeId: challengeID)
+    let body = AuthenticationOptsRequest(challengeId: challengeId)
 
     return await postRequest(url: url, body: body, token: token)
   }
 
   func addAuthenticator(
-    challengeID: String,
+    challengeId: String,
     credential: PasskeyRegistrationCredential,
     token: String
   ) async -> AuthsignalResponse<AddPasskeyAuthenticatorResponse> {
     let url = "\(baseURL)/client/user-authenticators/passkey"
 
     let body = AddPasskeyAuthenticatorRequest(
-      challengeId: challengeID,
+      challengeId: challengeId,
       registrationCredential: credential,
       deviceId: defaultDeviceID()
     )
@@ -41,14 +41,14 @@ class PasskeyAPIClient: BaseAPIClient {
   }
 
   func verify(
-    challengeID: String,
+    challengeId: String,
     credential: PasskeyAuthenticationCredential,
     token: String? = nil
   ) async -> AuthsignalResponse<VerifyPasskeyResponse> {
     let url = "\(baseURL)/client/verify/passkey"
 
     let body = VerifyPasskeyRequest(
-      challengeId: challengeID,
+      challengeId: challengeId,
       authenticationCredential: credential,
       deviceId: defaultDeviceID()
     )
@@ -57,9 +57,9 @@ class PasskeyAPIClient: BaseAPIClient {
   }
   
   func getPasskeyAuthenticator(
-    credentialID: String
+    credentialId: String
   ) async -> AuthsignalResponse<PasskeyAuthenticatorResponse> {
-    let url = "\(baseURL)/client/user-authenticators/passkey?credentialId=\(credentialID)"
+    let url = "\(baseURL)/client/user-authenticators/passkey?credentialId=\(credentialId)"
 
     return await getRequest(url: url)
   }
