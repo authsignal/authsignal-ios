@@ -44,11 +44,15 @@ public class AuthsignalPush {
 
   public func addCredential(
     token: String? = nil,
-    keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly
+    keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly,
+    userPresenceRequired: Bool = false
   ) async -> AuthsignalResponse<Bool> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
     
-    guard let publicKey = KeyManager.getOrCreatePublicKey(keychainAccess: keychainAccess) else {
+    guard let publicKey = KeyManager.getOrCreatePublicKey(
+      keychainAccess: keychainAccess,
+      userPresenceRequired: userPresenceRequired
+    ) else {
       return AuthsignalResponse(error: "Unable to generate key pair.")
     }
 

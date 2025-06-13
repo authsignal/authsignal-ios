@@ -8,14 +8,14 @@ class KeyManager {
     return loadKey(name: keyName)
   }
 
-  static func getOrCreatePublicKey(keychainAccess: KeychainAccess) -> String? {
+  static func getOrCreatePublicKey(keychainAccess: KeychainAccess, userPresenceRequired: Bool = false) -> String? {
     let publicKey = getPublicKey()
 
     if publicKey != nil {
       return publicKey
     }
 
-    return createKeyPair(keychainAccess: keychainAccess)
+    return createKeyPair(keychainAccess: keychainAccess, userPresenceRequired: userPresenceRequired)
   }
 
   static func getPublicKey() -> String? {
@@ -26,11 +26,13 @@ class KeyManager {
     return derivePublicKey(secKey: secKey)
   }
 
-  static func createKeyPair(keychainAccess: KeychainAccess) -> String? {
+  static func createKeyPair(keychainAccess: KeychainAccess, userPresenceRequired: Bool) -> String? {
+    let flags: SecAccessControlCreateFlags = userPresenceRequired == true ? [.privateKeyUsage, .userPresence] : [.privateKeyUsage]
+    
     let access = SecAccessControlCreateWithFlags(
       kCFAllocatorDefault,
       getAccessibilitySecAttr(keychainAccess: keychainAccess),
-      [.privateKeyUsage],
+      flags,
       nil)!
 
     let tag = keyName.data(using: .utf8)!
