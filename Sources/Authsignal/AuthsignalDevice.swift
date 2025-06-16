@@ -36,6 +36,7 @@ public class AuthsignalDevice {
     let credential = DeviceCredential(
       credentialId: data.userAuthenticatorId,
       createdAt: data.verifiedAt,
+      userId: data.userId,
       lastAuthenticatedAt: data.lastVerifiedAt
     )
 
@@ -44,11 +45,15 @@ public class AuthsignalDevice {
 
   public func addCredential(
     token: String? = nil,
-    keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly
-  ) async -> AuthsignalResponse<Bool> {
+    keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly,
+    userPresenceRequired: Bool = false
+  ) async -> AuthsignalResponse<DeviceCredential> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
     
-    guard let publicKey = KeyManager.getOrCreatePublicKey(keychainAccess: keychainAccess) else {
+    guard let publicKey = KeyManager.getOrCreatePublicKey(
+      keychainAccess: keychainAccess,
+      userPresenceRequired: userPresenceRequired
+    ) else {
       return AuthsignalResponse(error: "Unable to generate key pair.")
     }
 
@@ -64,9 +69,14 @@ public class AuthsignalDevice {
       return AuthsignalResponse(error: response.error, errorCode: response.errorCode)
     }
     
-    let success = data.userAuthenticatorId != nil
+    let credential = DeviceCredential(
+      credentialId: data.userAuthenticatorId,
+      createdAt: data.verifiedAt,
+      userId: data.userId,
+      lastAuthenticatedAt: data.verifiedAt
+    )
 
-    return AuthsignalResponse(data: success)
+    return AuthsignalResponse(data: credential)
   }
 
   public func removeCredential() async -> AuthsignalResponse<Bool> {
