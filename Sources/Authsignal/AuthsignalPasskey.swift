@@ -68,7 +68,9 @@ public class AuthsignalPasskey {
     autofill: Bool = false,
     preferImmediatelyAvailableCredentials: Bool = true
   ) async -> AuthsignalResponse<SignInResponse> {
-    if (token != nil && autofill) {
+    let userToken = token ?? cache.token
+    
+    if (userToken != nil && autofill) {
       let error = "Autofill is not supported when providing a token."
       
       Logger.error("Error: \(error)")
@@ -76,7 +78,7 @@ public class AuthsignalPasskey {
       return AuthsignalResponse(error: error)
     }
     
-    if (token != nil && action != nil) {
+    if (userToken != nil && action != nil) {
       let error = "Action is not supported when providing a token."
       
       Logger.error("Error: \(error)")
@@ -88,7 +90,7 @@ public class AuthsignalPasskey {
     
     let challengeId = challengeResponse?.data?.challengeId
     
-    let optsResponse = await api.authenticationOptions(challengeId: challengeId, token: token)
+    let optsResponse = await api.authenticationOptions(challengeId: challengeId, token: userToken)
 
     guard let optsData = optsResponse.data else {
       return AuthsignalResponse(
@@ -119,7 +121,7 @@ public class AuthsignalPasskey {
     let verifyResponse = await api.verify(
       challengeId: optsData.challengeId,
       credential: credential,
-      token: token
+      token: userToken
     )
     
     guard let data = verifyResponse.data else {
