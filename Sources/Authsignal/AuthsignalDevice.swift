@@ -257,7 +257,8 @@ public class AuthsignalDevice {
     let response = await api.verify(
       challengeId: challengeId,
       publicKey: publicKey,
-      signature: signature!
+      signature: signature!,
+      token: cache.token
     )
     
     if let error = response.error {

@@ -88,6 +88,7 @@ class DeviceAPIClient: BaseAPIClient {
     challengeId: String,
     publicKey: String,
     signature: String,
+    token: String?
   ) async -> AuthsignalResponse<VerifyDeviceResponse> {
     let url = "\(baseURL)/client/verify/device"
 
@@ -97,6 +98,6 @@ class DeviceAPIClient: BaseAPIClient {
       signature: signature
     )
 
-    return await postRequest(url: url, body: body)
+    return await postRequest(url: url, body: body, token: token)
   }
 } 
