@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'Authsignal'
-  s.version          = '1.2.5'
+  s.version          = '1.2.6'
   s.summary          = 'The Authsignal SDK for iOS'
 
   s.homepage         = 'https://github.com/authsignal/authsignal-ios'

@@ -68,23 +68,8 @@ public class AuthsignalPasskey {
     autofill: Bool = false,
     preferImmediatelyAvailableCredentials: Bool = true
   ) async -> AuthsignalResponse<SignInResponse> {
-    let userToken = token ?? cache.token
-    
-    if (userToken != nil && autofill) {
-      let error = "Autofill is not supported when providing a token."
-      
-      Logger.error("Error: \(error)")
-      
-      return AuthsignalResponse(error: error)
-    }
-    
-    if (userToken != nil && action != nil) {
-      let error = "Action is not supported when providing a token."
-      
-      Logger.error("Error: \(error)")
-      
-      return AuthsignalResponse(error: error)
-    }
+    // Only use token if an action is not provided
+    let userToken = action == nil ? token ?? cache.token : nil
     
     let challengeResponse = action != nil ? await api.challenge(action: action!) : nil
     
