@@ -8,8 +8,8 @@ public class AuthsignalPasskey {
   private let passkeyLocalKey = "@as_passkey_credential_id"
   private let cache = TokenCache.shared
 
-  public init(tenantID: String, baseURL: String) {
-    api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
+    api = PasskeyAPIClient(tenantID: tenantID, baseURL: baseURL, deviceID: deviceID)
     passkeyManager = PasskeyManager()
   }
 
