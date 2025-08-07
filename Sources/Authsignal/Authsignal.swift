@@ -10,9 +10,9 @@ public class Authsignal {
   public let sms: AuthsignalSMS
   public let totp: AuthsignalTOTP
 
-  public init(tenantID: String, baseURL: String) {
+  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
     email = AuthsignalEmail(tenantID: tenantID, baseURL: baseURL)
-    passkey = AuthsignalPasskey(tenantID: tenantID, baseURL: baseURL)
+    passkey = AuthsignalPasskey(tenantID: tenantID, baseURL: baseURL, deviceID: deviceID)
     push = AuthsignalPush(tenantID: tenantID, baseURL: baseURL)
     device = AuthsignalDevice(tenantID: tenantID, baseURL: baseURL)
     sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL)

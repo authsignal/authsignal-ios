@@ -34,7 +34,7 @@ class PasskeyAPIClient: BaseAPIClient {
     let body = AddPasskeyAuthenticatorRequest(
       challengeId: challengeId,
       registrationCredential: credential,
-      deviceId: defaultDeviceID()
+      deviceId: self.deviceID ?? defaultDeviceID()
     )
 
     return await postRequest(url: url, body: body, token: token)
@@ -50,7 +50,7 @@ class PasskeyAPIClient: BaseAPIClient {
     let body = VerifyPasskeyRequest(
       challengeId: challengeId,
       authenticationCredential: credential,
-      deviceId: defaultDeviceID()
+      deviceId: self.deviceID ?? defaultDeviceID()
     )
 
     return await postRequest(url: url, body: body, token: token)
