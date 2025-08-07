@@ -74,17 +74,10 @@ class BaseAPIClient {
       if let httpResponse = response as? HTTPURLResponse,
         httpResponse.statusCode != 200
       {
-        if (httpResponse.statusCode == 404) {
-          return AuthsignalResponse(
-            error: "API endpoint not found. Ensure your Authsignal base URL is valid.",
-            errorCode: "api_error"
-          )
-        }
-        
         let responseError = json?["error"] as? String
         let responseErrorCode = json?["errorCode"] as? String
         let responseErrorDescription = json?["errorDescription"] as? String
-        
+
         if let responseError = responseError {
           Logger.error("API response error: \(responseError)")
         }
@@ -99,6 +92,13 @@ class BaseAPIClient {
         
         let error = !(responseErrorDescription ?? "").isEmpty ? responseErrorDescription : responseError
         let errorCode = responseErrorCode
+
+        if httpResponse.statusCode == 404 && (error?.isEmpty ?? true) {
+          return AuthsignalResponse(
+            error: "API endpoint not found. Ensure your Authsignal base URL is valid.",
+            errorCode: "api_error"
+          )
+        }
         
         return AuthsignalResponse(error: error ?? "Unexpected error.", errorCode: errorCode)
       }
