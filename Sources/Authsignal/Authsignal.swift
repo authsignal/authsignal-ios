@@ -8,6 +8,7 @@ public class Authsignal {
   public let push: AuthsignalPush
   public let device: AuthsignalDevice
   public let sms: AuthsignalSMS
+  public let whatsapp: AuthsignalWhatsApp
   public let totp: AuthsignalTOTP
 
   public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
@@ -16,6 +17,7 @@ public class Authsignal {
     push = AuthsignalPush(tenantID: tenantID, baseURL: baseURL)
     device = AuthsignalDevice(tenantID: tenantID, baseURL: baseURL)
     sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL)
+    whatsapp = AuthsignalWhatsApp(tenantID: tenantID, baseURL: baseURL)
     totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL)
   }
   
