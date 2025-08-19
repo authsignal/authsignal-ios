@@ -140,6 +140,15 @@ public class AuthsignalPasskey {
     passkeyManager.cancelRequest()
   }
   
+  public func isSupported() -> Bool {
+    if #available(iOS 15.0, *) {
+      return true
+    } else {
+      return false
+    }
+  }
+  
+  @available(*, deprecated, message: "Use 'preferImmediatelyAvailableCredentials' to control what happens when a passkey isn't available.")
   public func isAvailableOnDevice() async -> AuthsignalResponse<Bool> {
     guard let credentialId = UserDefaults.standard.string(forKey: passkeyLocalKey) else {
       return AuthsignalResponse(data: false)
