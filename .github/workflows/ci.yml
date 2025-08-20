@@ -20,7 +20,7 @@ jobs:
         run: gem install cocoapods
 
       - name: Pod lib lint
-        run: pod lib lint --allow-warnings --verbose
+        run: pod lib lint --allow-warnings
 
       - name: Swift package validation
         run: swift package resolve
