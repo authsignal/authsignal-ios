@@ -2,28 +2,28 @@ name: Build
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     name: Build and Test
     runs-on: macos-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.0'
-        bundler-cache: true
-        
-    - name: Install CocoaPods
-      run: gem install cocoapods
 
-    - name: Pod lib lint
-      run: pod lib lint --allow-warnings
-    
-    - name: Swift Package validation
-      run: swift package resolve 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.0"
+          bundler-cache: true
+
+      - name: Install CocoaPods
+        run: gem install cocoapods
+
+      - name: Pod lib lint
+        run: pod lib lint --allow-warnings --verbose
+
+      - name: Swift Package validation
+        run: swift package resolve
