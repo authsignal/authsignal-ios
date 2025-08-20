@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -20,7 +20,7 @@ jobs:
         run: gem install cocoapods
 
       - name: Pod lib lint
-        run: pod lib lint --allow-warnings
+        run: pod lib lint --allow-warnings --verbose
 
       - name: Swift package validation
         run: swift package resolve
