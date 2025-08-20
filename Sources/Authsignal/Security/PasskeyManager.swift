@@ -37,10 +37,10 @@ class PasskeyManager: NSObject {
     )
     
     if #available(iOS 17.4, *) {
-      request.excludedCredentials = existingCredentialIds.map {
-        return ASAuthorizationPlatformPublicKeyCredentialDescriptor(
-          credentialID: Data($0.utf8)
-        )
+      request.excludedCredentials = existingCredentialIds.compactMap {
+        Data(base64URLEncoded: $0).map {
+          ASAuthorizationPlatformPublicKeyCredentialDescriptor(credentialID: $0)
+        }
       }
     }
 
@@ -85,6 +85,15 @@ class PasskeyManager: NSObject {
     } catch {
       self.controller = nil
       self.continuation = nil
+      
+      if #available(iOS 18.0, *),
+         let authError = error as? ASAuthorizationError,
+         authError.code == .matchedExcludedCredential {
+        return AuthsignalResponse(
+          error: "An existing credential is already available for this device.",
+          errorCode: "matched_excluded_credential",
+        )
+      }
       
       Logger.error("Registration error: \(error)")
       
@@ -170,10 +179,10 @@ class PasskeyManager: NSObject {
       self.controller = nil
       self.continuation = nil
       
-      Logger.error("Passkey authentication canceled.")
-      
-      return AuthsignalResponse(errorCode: "user_canceled")
-      
+      return AuthsignalResponse(
+        error: "The request was canceled by the user or the device has no passkeys available.",
+        errorCode: "user_canceled",
+      )
     } catch {
       self.controller = nil
       self.continuation = nil
