@@ -7,24 +7,22 @@ on:
 jobs:
   deploy:
     name: Deploy to CocoaPods
-    runs-on: macos-latest
-    
+    runs-on: macos-14
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.0'
-        bundler-cache: true
-        
-    - name: Install CocoaPods
-      run: gem install cocoapods
+      - uses: actions/checkout@v4
 
-    - name: Deploy to CocoaPods
-      env:
-        COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-      run: |
-        pod lib lint --allow-warnings
-        pod trunk push --allow-warnings 
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.0"
+          bundler-cache: true
+
+      - name: Install CocoaPods
+        run: gem install cocoapods
+
+      - name: Deploy to CocoaPods
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: |
+          pod lib lint --allow-warnings
+          pod trunk push --allow-warnings
