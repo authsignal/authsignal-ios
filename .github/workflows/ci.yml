@@ -6,12 +6,9 @@ on:
 
 jobs:
   build:
-    name: Build and Test
-    runs-on: macos-latest
-
+    runs-on: macos-14
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -25,5 +22,5 @@ jobs:
       - name: Pod lib lint
         run: pod lib lint --allow-warnings --verbose
 
-      - name: Swift Package validation
+      - name: Swift package validation
         run: swift package resolve
