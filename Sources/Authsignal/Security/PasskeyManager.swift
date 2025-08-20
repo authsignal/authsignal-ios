@@ -9,7 +9,8 @@ class PasskeyManager: NSObject {
     relyingPartyId: String,
     challenge: String,
     userId: String,
-    displayName: String
+    displayName: String,
+    existingCredentialIds: [String]
   ) async -> AuthsignalResponse<PasskeyRegistrationCredential>
   {
     guard #available(iOS 15.0, *) else {
@@ -26,14 +27,22 @@ class PasskeyManager: NSObject {
 
     let userData = Data(userId.utf8)
 
-    let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
-      relyingPartyIdentifier: relyingPartyId)
+    let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: relyingPartyId)
 
+    
     let request = provider.createCredentialRegistrationRequest(
       challenge: challengeData,
       name: displayName,
       userID: userData
     )
+    
+    if #available(iOS 17.4, *) {
+      request.excludedCredentials = existingCredentialIds.map {
+        return ASAuthorizationPlatformPublicKeyCredentialDescriptor(
+          credentialID: Data($0.utf8)
+        )
+      }
+    }
 
     let controller = ASAuthorizationController(authorizationRequests: [request])
     

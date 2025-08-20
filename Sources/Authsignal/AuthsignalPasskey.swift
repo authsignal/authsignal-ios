@@ -29,7 +29,8 @@ public class AuthsignalPasskey {
       relyingPartyId: optsData.options.rp.id,
       challenge: optsData.options.challenge,
       userId: optsData.options.user.id,
-      displayName: optsData.options.user.displayName
+      displayName: optsData.options.user.displayName,
+      existingCredentialIds: optsData.options.excludeCredentials.map { $0.id }
     )
     
     if let error = credentialResponse.error {
