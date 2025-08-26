@@ -91,7 +91,7 @@ class PasskeyManager: NSObject {
          authError.code == .matchedExcludedCredential {
         return AuthsignalResponse(
           error: "An existing credential is already available for this device.",
-          errorCode: "matched_excluded_credential"
+          errorCode: SdkErrorCodes.matchedExcludedCredential
         )
       }
       
@@ -181,7 +181,7 @@ class PasskeyManager: NSObject {
       
       return AuthsignalResponse(
         error: "The request was canceled by the user or the device has no passkeys available.",
-        errorCode: "user_canceled"
+        errorCode: SdkErrorCodes.userCanceled
       )
     } catch {
       self.controller = nil

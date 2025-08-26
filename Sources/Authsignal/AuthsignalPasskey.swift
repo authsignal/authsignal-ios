@@ -13,7 +13,12 @@ public class AuthsignalPasskey {
     passkeyManager = PasskeyManager()
   }
 
-  public func signUp(token: String? = nil, username: String? = nil, displayName: String? = nil) async -> AuthsignalResponse<SignUpResponse> {
+  public func signUp(
+    token: String? = nil,
+    username: String? = nil,
+    displayName: String? = nil,
+    ignorePasskeyAlreadyExistsError: Bool = false
+  ) async -> AuthsignalResponse<SignUpResponse> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
     
     let optsResponse = await api.registrationOptions(token: userToken, username: username, displayName: displayName)
@@ -33,8 +38,12 @@ public class AuthsignalPasskey {
       existingCredentialIds: optsData.options.excludeCredentials.map { $0.id }
     )
     
+    if ignorePasskeyAlreadyExistsError && credentialResponse.errorCode == SdkErrorCodes.matchedExcludedCredential {
+      return AuthsignalResponse(error: nil)
+    }
+    
     if let error = credentialResponse.error {
-      return AuthsignalResponse(error: error)
+      return AuthsignalResponse(error: error, errorCode: credentialResponse.errorCode)
     }
 
     guard let credential = credentialResponse.data else {
@@ -147,6 +156,24 @@ public class AuthsignalPasskey {
     } else {
       return false
     }
+  }
+  
+  public func shouldPromptToCreatePasskey() async -> AuthsignalResponse<Bool> {
+    guard let credentialId = UserDefaults.standard.string(forKey: passkeyLocalKey) else {
+      return AuthsignalResponse(data: true)
+    }
+    
+    let passkeyAuthenticatorResponse = await api.getPasskeyAuthenticator(credentialId: credentialId)
+    
+    if passkeyAuthenticatorResponse.errorCode == SdkErrorCodes.invalidCredential  {
+      return AuthsignalResponse(data: true)
+    }
+    
+    return AuthsignalResponse(
+      data: false,
+      error: passkeyAuthenticatorResponse.error,
+      errorCode: passkeyAuthenticatorResponse.errorCode
+    )
   }
   
   @available(*, deprecated, message: "Use 'preferImmediatelyAvailableCredentials' to control what happens when a passkey isn't available.")
