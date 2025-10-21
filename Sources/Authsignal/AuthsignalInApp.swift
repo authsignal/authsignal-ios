@@ -2,13 +2,13 @@ import Foundation
 import Security
 import UIKit
 
-public class AuthsignalPush {
-  private let api: PushAPIClient
+public class AuthsignalInApp {
+  private let api: InAppAPIClient
   private let cache = TokenCache.shared
-  private let keyManager = KeyManager(keySuffix: "push")
+  private let keyManager = KeyManager(keySuffix: "in_app")
 
   public init(tenantID: String, baseURL: String) {
-    api = PushAPIClient(tenantID: tenantID, baseURL: baseURL)
+    api = InAppAPIClient(tenantID: tenantID, baseURL: baseURL)
   }
 
   public func getCredential() async -> AuthsignalResponse<AppCredential> {
@@ -94,63 +94,32 @@ public class AuthsignalPush {
       errorCode: response.errorCode
     )
   }
-
-  public func getChallenge() async -> AuthsignalResponse<PushChallenge?> {
-    guard let publicKey = keyManager.getPublicKey() else {
-      return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
-    }
-
-    let response = await api.getChallenge(publicKey: publicKey)
-
-    if let error = response.error {
-      return AuthsignalResponse(error: error, errorCode: response.errorCode)
+  
+  public func verify() async -> AuthsignalResponse<InAppVerifyResponse> {
+    let challengeResponse = await api.challenge()
+    
+    guard let challengeId = challengeResponse.data?.challengeId else {
+      return AuthsignalResponse(error: challengeResponse.error ?? "Error generating challenge.")
     }
     
-    guard let data = response.data else {
-      return AuthsignalResponse(error: response.error, errorCode: response.errorCode)
-    }
-    
-    guard let challengeId = data.challengeId, let userId = data.userId else {
-      return AuthsignalResponse(data: nil)
-    }
-    
-    let pushChallenge = PushChallenge(
-      challengeId: challengeId,
-      userId: userId,
-      actionCode: data.actionCode,
-      idempotencyKey: data.idempotencyKey,
-      deviceId: data.deviceId,
-      userAgent:data.userAgent,
-      ipAddress: data.ipAddress
-    )
-    
-    return AuthsignalResponse(data: pushChallenge)
-  }
-
-  public func updateChallenge(
-    challengeId: String,
-    approved: Bool,
-    verificationCode: String? = nil
-  ) async -> AuthsignalResponse<Bool> {
     let secKey = keyManager.getKey()
     let publicKey = keyManager.getPublicKey()
 
     guard let secKey = secKey, let publicKey = publicKey else {
       return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
     }
-
+    
     let signatureResponse = Signature.sign(message: challengeId, privateKey: secKey)
     
     guard let signature = signatureResponse.data else {
       return AuthsignalResponse(error: signatureResponse.error)
     }
-    
-    let response = await api.updateChallenge(
+
+    let response = await api.verify(
       challengeId: challengeId,
       publicKey: publicKey,
       signature: signature,
-      approved: approved,
-      verificationCode: verificationCode
+      token: cache.token
     )
     
     if let error = response.error {
@@ -159,7 +128,7 @@ public class AuthsignalPush {
         errorCode: response.errorCode
       )
     } else {
-      return AuthsignalResponse(data: response.data != nil)
+      return AuthsignalResponse(data: response.data!)
     }
   }
-}
+} 

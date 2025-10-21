@@ -2,13 +2,13 @@ import Foundation
 import Security
 import UIKit
 
-public class AuthsignalPush {
-  private let api: PushAPIClient
+public class AuthsignalQRCode {
+  private let api: QRCodeAPIClient
   private let cache = TokenCache.shared
-  private let keyManager = KeyManager(keySuffix: "push")
+  private let keyManager = KeyManager(keySuffix: "qr_code")
 
   public init(tenantID: String, baseURL: String) {
-    api = PushAPIClient(tenantID: tenantID, baseURL: baseURL)
+    api = QRCodeAPIClient(tenantID: tenantID, baseURL: baseURL)
   }
 
   public func getCredential() async -> AuthsignalResponse<AppCredential> {
@@ -95,36 +95,36 @@ public class AuthsignalPush {
     )
   }
 
-  public func getChallenge() async -> AuthsignalResponse<PushChallenge?> {
-    guard let publicKey = keyManager.getPublicKey() else {
+  public func claimChallenge(
+    challengeId: String
+  ) async -> AuthsignalResponse<ClaimChallengeResponse> {
+    let secKey = keyManager.getKey()
+    let publicKey = keyManager.getPublicKey()
+
+    guard let secKey = secKey, let publicKey = publicKey else {
       return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
     }
 
-    let response = await api.getChallenge(publicKey: publicKey)
+    let signatureResponse = Signature.sign(message: challengeId, privateKey: secKey)
+    
+    guard let signature = signatureResponse.data else {
+      return AuthsignalResponse(error: signatureResponse.error)
+    }
 
-    if let error = response.error {
-      return AuthsignalResponse(error: error, errorCode: response.errorCode)
-    }
-    
-    guard let data = response.data else {
-      return AuthsignalResponse(error: response.error, errorCode: response.errorCode)
-    }
-    
-    guard let challengeId = data.challengeId, let userId = data.userId else {
-      return AuthsignalResponse(data: nil)
-    }
-    
-    let pushChallenge = PushChallenge(
+    let response = await api.claimChallenge(
       challengeId: challengeId,
-      userId: userId,
-      actionCode: data.actionCode,
-      idempotencyKey: data.idempotencyKey,
-      deviceId: data.deviceId,
-      userAgent:data.userAgent,
-      ipAddress: data.ipAddress
+      publicKey: publicKey,
+      signature: signature
     )
     
-    return AuthsignalResponse(data: pushChallenge)
+    if let data = response.data {
+      return AuthsignalResponse(data: data)
+    } else {
+      return AuthsignalResponse(
+        error: response.error,
+        errorCode: response.errorCode
+      )
+    }
   }
 
   public func updateChallenge(
@@ -144,7 +144,7 @@ public class AuthsignalPush {
     guard let signature = signatureResponse.data else {
       return AuthsignalResponse(error: signatureResponse.error)
     }
-    
+
     let response = await api.updateChallenge(
       challengeId: challengeId,
       publicKey: publicKey,
@@ -162,4 +162,4 @@ public class AuthsignalPush {
       return AuthsignalResponse(data: response.data != nil)
     }
   }
-}
+} 
