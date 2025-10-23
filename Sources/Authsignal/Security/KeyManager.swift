@@ -2,13 +2,21 @@ import Foundation
 import Security
 
 class KeyManager {
-  private static let keyName = "authsignal_signing_key"
-
-  static func getKey() -> SecKey? {
-    return loadKey(name: keyName)
+  private let keyName = "authsignal_signing_key"
+  private let scopedKeyName: String
+  
+  init(keySuffix: String) {
+    scopedKeyName = "\(keyName)_\(keySuffix)"
+  }
+  
+  func getKey() -> SecKey? {
+    return loadKey(name: scopedKeyName) ?? loadKey(name: keyName)
   }
 
-  static func getOrCreatePublicKey(keychainAccess: KeychainAccess, userPresenceRequired: Bool = false) -> String? {
+  func getOrCreatePublicKey(
+    keychainAccess: KeychainAccess,
+    userPresenceRequired: Bool = false,
+  ) -> String? {
     let publicKey = getPublicKey()
 
     if publicKey != nil {
@@ -18,15 +26,15 @@ class KeyManager {
     return createKeyPair(keychainAccess: keychainAccess, userPresenceRequired: userPresenceRequired)
   }
 
-  static func getPublicKey() -> String? {
-    guard let secKey = loadKey(name: keyName) else {
+  func getPublicKey() -> String? {
+    guard let secKey = getKey() else {
       return nil
     }
 
     return derivePublicKey(secKey: secKey)
   }
 
-  static func createKeyPair(keychainAccess: KeychainAccess, userPresenceRequired: Bool) -> String? {
+  func createKeyPair(keychainAccess: KeychainAccess, userPresenceRequired: Bool) -> String? {
     let flags: SecAccessControlCreateFlags = userPresenceRequired == true ? [.privateKeyUsage, .userPresence] : [.privateKeyUsage]
     
     let access = SecAccessControlCreateWithFlags(
@@ -35,7 +43,7 @@ class KeyManager {
       flags,
       nil)!
 
-    let tag = keyName.data(using: .utf8)!
+    let tag = scopedKeyName.data(using: .utf8)!
 
     let attributes: [String: Any] = [
       kSecAttrKeyType as String: kSecAttrKeyTypeEC,
@@ -61,8 +69,10 @@ class KeyManager {
     return derivePublicKey(secKey: privateKey)
   }
 
-  static func deleteKeyPair() -> Bool {
-    let tag = keyName.data(using: .utf8)!
+  func deleteKeyPair() -> Bool {
+    let nameToDelete = loadKey(name: scopedKeyName) != nil ? scopedKeyName : keyName
+    
+    let tag = nameToDelete.data(using: .utf8)!
 
     let query: [String: Any] = [
       kSecClass as String: kSecClassKey,
@@ -80,7 +90,7 @@ class KeyManager {
     return true
   }
 
-  static func derivePublicKey(secKey: SecKey) -> String? {
+  func derivePublicKey(secKey: SecKey) -> String? {
     guard let publicKey = SecKeyCopyPublicKey(secKey) else {
       Logger.error("Error copying public key")
 
@@ -100,7 +110,7 @@ class KeyManager {
     return publicKeyDER.base64EncodedString()
   }
 
-  static func loadKey(name: String) -> SecKey? {
+  private func loadKey(name: String) -> SecKey? {
     let tag = name.data(using: .utf8)!
 
     let query: [String: Any] = [
@@ -121,7 +131,7 @@ class KeyManager {
     return (item as! SecKey)
   }
 
-  private static func createSubjectPublicKeyInfo(rawPublicKeyData: Data) -> Data {
+  private func createSubjectPublicKeyInfo(rawPublicKeyData: Data) -> Data {
     let secp256r1Header = Data(_: [
       0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08,
       0x2a,
@@ -131,7 +141,7 @@ class KeyManager {
     return secp256r1Header + rawPublicKeyData
   }
   
-  private static func getAccessibilitySecAttr(keychainAccess: KeychainAccess) -> CFString {
+  private func getAccessibilitySecAttr(keychainAccess: KeychainAccess) -> CFString {
     switch keychainAccess {
     case .afterFirstUnlock:
       return kSecAttrAccessibleAfterFirstUnlock
