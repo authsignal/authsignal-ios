@@ -200,6 +200,7 @@ class PasskeyManager: NSObject {
   }
 }
 
+@available(iOSApplicationExtension, unavailable)
 extension PasskeyManager: ASAuthorizationControllerDelegate,
   ASAuthorizationControllerPresentationContextProviding
 {
