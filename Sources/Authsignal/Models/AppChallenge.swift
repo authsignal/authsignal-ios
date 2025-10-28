@@ -1,4 +1,4 @@
-public struct PushChallenge: Codable {
+public struct AppChallenge: Codable {
   public let challengeId: String
   public let userId: String
   public let actionCode: String?
