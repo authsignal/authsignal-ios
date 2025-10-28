@@ -23,7 +23,10 @@ class KeyManager {
       return publicKey
     }
 
-    return createKeyPair(keychainAccess: keychainAccess, userPresenceRequired: userPresenceRequired)
+    return createKeyPair(
+      keychainAccess: keychainAccess,
+      userPresenceRequired: userPresenceRequired
+    )
   }
 
   func getPublicKey() -> String? {

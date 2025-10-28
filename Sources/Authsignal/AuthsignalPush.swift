@@ -95,7 +95,7 @@ public class AuthsignalPush {
     )
   }
 
-  public func getChallenge() async -> AuthsignalResponse<PushChallenge?> {
+  public func getChallenge() async -> AuthsignalResponse<AppChallenge?> {
     guard let publicKey = keyManager.getPublicKey() else {
       return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
     }
@@ -114,7 +114,7 @@ public class AuthsignalPush {
       return AuthsignalResponse(data: nil)
     }
     
-    let pushChallenge = PushChallenge(
+    let pushChallenge = AppChallenge(
       challengeId: challengeId,
       userId: userId,
       actionCode: data.actionCode,
