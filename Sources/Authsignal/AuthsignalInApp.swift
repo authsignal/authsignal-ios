@@ -95,8 +95,8 @@ public class AuthsignalInApp {
     )
   }
   
-  public func verify() async -> AuthsignalResponse<InAppVerifyResponse> {
-    let challengeResponse = await api.challenge()
+  public func verify(action: String? = nil) async -> AuthsignalResponse<InAppVerifyResponse> {
+    let challengeResponse = await api.challenge(action: action)
     
     guard let challengeId = challengeResponse.data?.challengeId else {
       return AuthsignalResponse(error: challengeResponse.error ?? "Error generating challenge.")
