@@ -114,12 +114,15 @@ public class AuthsignalInApp {
     guard let signature = signatureResponse.data else {
       return AuthsignalResponse(error: signatureResponse.error)
     }
+    
+    // Only set a user token if an action is not provided
+    let userToken = action == nil ? cache.token : nil
 
     let response = await api.verify(
       challengeId: challengeId,
       publicKey: publicKey,
       signature: signature,
-      token: cache.token
+      token: userToken
     )
     
     if let error = response.error {
