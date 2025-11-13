@@ -11,8 +11,8 @@ public class AuthsignalInApp {
     api = InAppAPIClient(tenantID: tenantID, baseURL: baseURL)
   }
 
-  public func getCredential() async -> AuthsignalResponse<AppCredential> {
-    guard let publicKey = keyManager.getPublicKey() else {
+  public func getCredential(username: String? = nil) async -> AuthsignalResponse<AppCredential> {
+    guard let publicKey = keyManager.getPublicKey(username: username) else {
       return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
     }
 
@@ -39,13 +39,15 @@ public class AuthsignalInApp {
   public func addCredential(
     token: String? = nil,
     keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly,
-    userPresenceRequired: Bool = false
+    userPresenceRequired: Bool = false,
+    username: String? = nil
   ) async -> AuthsignalResponse<AppCredential> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
     
     guard let publicKey = keyManager.getOrCreatePublicKey(
       keychainAccess: keychainAccess,
-      userPresenceRequired: userPresenceRequired
+      userPresenceRequired: userPresenceRequired,
+      username: username
     ) else {
       return AuthsignalResponse(errorCode: SdkErrorCodes.createKeyPairFailed)
     }
@@ -72,9 +74,9 @@ public class AuthsignalInApp {
     return AuthsignalResponse(data: credential)
   }
 
-  public func removeCredential() async -> AuthsignalResponse<Bool> {
-    let secKey = keyManager.getKey()
-    let publicKey = keyManager.getPublicKey()
+  public func removeCredential(username: String? = nil) async -> AuthsignalResponse<Bool> {
+    let secKey = keyManager.getKey(username: username)
+    let publicKey = keyManager.getPublicKey(username: username)
 
     guard let secKey = secKey, let publicKey = publicKey else {
       return AuthsignalResponse(data: false)
@@ -95,15 +97,15 @@ public class AuthsignalInApp {
     )
   }
   
-  public func verify(action: String? = nil) async -> AuthsignalResponse<InAppVerifyResponse> {
+  public func verify(action: String? = nil, username: String? = nil) async -> AuthsignalResponse<InAppVerifyResponse> {
     let challengeResponse = await api.challenge(action: action)
     
     guard let challengeId = challengeResponse.data?.challengeId else {
       return AuthsignalResponse(error: challengeResponse.error ?? "Error generating challenge.")
     }
     
-    let secKey = keyManager.getKey()
-    let publicKey = keyManager.getPublicKey()
+    let secKey = keyManager.getKey(username: username)
+    let publicKey = keyManager.getPublicKey(username: username)
 
     guard let secKey = secKey, let publicKey = publicKey else {
       return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
