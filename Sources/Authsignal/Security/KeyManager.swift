@@ -2,95 +2,60 @@ import Foundation
 import Security
 
 class KeyManager {
-  private let keyName = "authsignal_signing_key"
-  private let scopedKeyName: String
+  private let keyTagPrefix = "authsignal_signing_key"
+  private let keyTag: String
   
   init(keySuffix: String) {
-    scopedKeyName = "\(keyName)_\(keySuffix)"
+    keyTag = "\(keyTagPrefix)_\(keySuffix)"
   }
   
-  func getKey() -> SecKey? {
-    return loadKey(name: scopedKeyName) ?? loadKey(name: keyName)
+  func getKey(username: String? = nil) -> SecKey? {
+    let userKeyTag = getUserKeyTag(username: username)
+    let legacyKeyTag = getLegacyKeyTag()
+    
+    // Fall back to legacy key tag for backwards compatibility
+    return loadKey(tag: userKeyTag) ?? loadKey(tag: legacyKeyTag)
   }
 
   func getOrCreatePublicKey(
     keychainAccess: KeychainAccess,
     userPresenceRequired: Bool = false,
+    username: String? = nil
   ) -> String? {
-    let publicKey = getPublicKey()
+    let publicKey = getPublicKey(username: username)
 
     if publicKey != nil {
       return publicKey
     }
 
-    return createKeyPair(
+    return createKey(
       keychainAccess: keychainAccess,
-      userPresenceRequired: userPresenceRequired
+      userPresenceRequired: userPresenceRequired,
+      username: username
     )
   }
 
-  func getPublicKey() -> String? {
-    guard let secKey = getKey() else {
+  func getPublicKey(username: String? = nil) -> String? {
+    guard let secKey = getKey(username: username) else {
       return nil
     }
 
     return derivePublicKey(secKey: secKey)
   }
 
-  func createKeyPair(keychainAccess: KeychainAccess, userPresenceRequired: Bool) -> String? {
-    let flags: SecAccessControlCreateFlags = userPresenceRequired == true ? [.privateKeyUsage, .userPresence] : [.privateKeyUsage]
+  func deleteKeyPair(username: String? = nil) -> Bool {
+    let userKeyTag = getUserKeyTag(username: username)
+
+    let success = deleteKey(tag: userKeyTag)
     
-    let access = SecAccessControlCreateWithFlags(
-      kCFAllocatorDefault,
-      getAccessibilitySecAttr(keychainAccess: keychainAccess),
-      flags,
-      nil)!
-
-    let tag = scopedKeyName.data(using: .utf8)!
-
-    let attributes: [String: Any] = [
-      kSecAttrKeyType as String: kSecAttrKeyTypeEC,
-      kSecAttrKeySizeInBits as String: 256,
-      kSecAttrTokenID as String: kSecAttrTokenIDSecureEnclave,
-      kSecPrivateKeyAttrs as String: [
-        kSecAttrIsPermanent as String: true,
-        kSecAttrApplicationTag as String: tag,
-        kSecAttrAccessControl as String: access,
-      ] as [String: Any],
-    ]
-
-    var error: Unmanaged<CFError>?
-
-    guard let privateKey = SecKeyCreateRandomKey(attributes as CFDictionary, &error) else {
-      let err = error!.takeRetainedValue() as Error
-
-      print(err)
-
-      return nil
+    if (success) {
+      return true
     }
-
-    return derivePublicKey(secKey: privateKey)
-  }
-
-  func deleteKeyPair() -> Bool {
-    let nameToDelete = loadKey(name: scopedKeyName) != nil ? scopedKeyName : keyName
     
-    let tag = nameToDelete.data(using: .utf8)!
-
-    let query: [String: Any] = [
-      kSecClass as String: kSecClassKey,
-      kSecAttrApplicationTag as String: tag,
-      kSecAttrKeyType as String: kSecAttrKeyTypeEC,
-      kSecReturnRef as String: true,
-    ]
-
-    let status = SecItemDelete(query as CFDictionary)
-
-    guard status == errSecSuccess else {
-      return false
-    }
-
-    return true
+    // Fall back to deleting legacy key
+    let legacyKeyTag =  getLegacyKeyTag()
+    
+    return deleteKey(tag: legacyKeyTag)
   }
 
   func derivePublicKey(secKey: SecKey) -> String? {
@@ -112,13 +77,67 @@ class KeyManager {
 
     return publicKeyDER.base64EncodedString()
   }
+  
+  private func createKey(
+    keychainAccess: KeychainAccess,
+    userPresenceRequired: Bool,
+    username: String? = nil
+  ) -> String? {
+    let flags: SecAccessControlCreateFlags = userPresenceRequired == true ? [.privateKeyUsage, .userPresence] : [.privateKeyUsage]
+    
+    let access = SecAccessControlCreateWithFlags(
+      kCFAllocatorDefault,
+      getAccessibilitySecAttr(keychainAccess: keychainAccess),
+      flags,
+      nil)!
 
-  private func loadKey(name: String) -> SecKey? {
-    let tag = name.data(using: .utf8)!
+    let userKeyTag = getUserKeyTag(username: username)
 
+    let attributes: [String: Any] = [
+      kSecAttrKeyType as String: kSecAttrKeyTypeEC,
+      kSecAttrKeySizeInBits as String: 256,
+      kSecAttrTokenID as String: kSecAttrTokenIDSecureEnclave,
+      kSecPrivateKeyAttrs as String: [
+        kSecAttrIsPermanent as String: true,
+        kSecAttrApplicationTag as String: userKeyTag.data(using: .utf8)!,
+        kSecAttrAccessControl as String: access,
+      ] as [String: Any],
+    ]
+
+    var error: Unmanaged<CFError>?
+
+    guard let privateKey = SecKeyCreateRandomKey(attributes as CFDictionary, &error) else {
+      let err = error!.takeRetainedValue() as Error
+
+      print(err)
+
+      return nil
+    }
+
+    return derivePublicKey(secKey: privateKey)
+  }
+  
+  private func deleteKey(tag: String) -> Bool {
     let query: [String: Any] = [
       kSecClass as String: kSecClassKey,
-      kSecAttrApplicationTag as String: tag,
+      kSecAttrApplicationTag as String: tag.data(using: .utf8)!,
+      kSecAttrKeyType as String: kSecAttrKeyTypeEC,
+      kSecReturnRef as String: true,
+    ]
+
+    let status = SecItemDelete(query as CFDictionary)
+
+    guard status == errSecSuccess else {
+      return false
+    }
+
+    return true
+  }
+
+  private func loadKey(tag: String) -> SecKey? {
+    let query: [String: Any] = [
+      kSecClass as String: kSecClassKey,
+      kSecAttrApplicationTag as String: tag.data(using: .utf8)!,
       kSecAttrKeyType as String: kSecAttrKeyTypeEC,
       kSecReturnRef as String: true,
     ]
@@ -157,5 +176,17 @@ class KeyManager {
     case .whenPasscodeSetThisDeviceOnly:
       return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
     }
+  }
+  
+  private func getUserKeyTag(username: String?) -> String {
+    let cleanUsername = username?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "[^A-Za-z0-9_-]", with: "-", options: .regularExpression)
+    
+    return cleanUsername.map { "\(keyTag)_\($0)" } ?? keyTag
+  }
+  
+  private func getLegacyKeyTag() -> String {
+    return keyTagPrefix
   }
 }
