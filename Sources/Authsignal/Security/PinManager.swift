@@ -75,33 +75,11 @@ class PinManager {
     return items.compactMap { $0[kSecAttrAccount as String] as? String }
   }
     
-  func usernameExists(_ username: String) -> Bool {
-    let query: [String: Any] = [
-      kSecClass as String: kSecClassGenericPassword,
-      kSecAttrService as String: service,
-      kSecAttrAccount as String: username,
-      kSecReturnData as String: false
-    ]
-    
-    let status = SecItemCopyMatching(query as CFDictionary, nil)
-    
-    return status == errSecSuccess
-  }
-    
   func deletePin(username: String) {
     let query: [String: Any] = [
       kSecClass as String: kSecClassGenericPassword,
       kSecAttrService as String: service,
       kSecAttrAccount as String: username
-    ]
-    
-    SecItemDelete(query as CFDictionary)
-  }
-  
-  func deleteAll() {
-    let query: [String: Any] = [
-      kSecClass as String: kSecClassGenericPassword,
-      kSecAttrService as String: service
     ]
     
     SecItemDelete(query as CFDictionary)

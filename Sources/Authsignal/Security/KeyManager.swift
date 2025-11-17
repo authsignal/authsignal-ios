@@ -179,9 +179,7 @@ class KeyManager {
   }
   
   private func getUserKeyTag(username: String?) -> String {
-    let cleanUsername = username?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "[^A-Za-z0-9_-]", with: "-", options: .regularExpression)
+    let cleanUsername = username?.trimmingCharacters(in: .whitespacesAndNewlines)
     
     return cleanUsername.map { "\(keyTag)_\($0)" } ?? keyTag
   }
