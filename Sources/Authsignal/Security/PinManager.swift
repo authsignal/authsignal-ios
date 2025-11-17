@@ -35,7 +35,7 @@ class PinManager {
     }
   }
     
-  func verifyPin(pin: String, username: String) -> Bool {
+  func validatePin(pin: String, username: String) -> Bool {
     let query: [String: Any] = [
       kSecClass as String: kSecClassGenericPassword,
       kSecAttrService as String: service,

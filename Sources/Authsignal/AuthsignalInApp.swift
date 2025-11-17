@@ -152,9 +152,9 @@ public class AuthsignalInApp {
   }
   
   public func verifyPin(pin: String, username: String, action: String? = nil) async -> AuthsignalResponse<VerifyPinResponse> {
-    let isVerified = pinManager.verifyPin(pin: pin, username: username)
+    let isPinValid = pinManager.validatePin(pin: pin, username: username)
     
-    if (isVerified) {
+    if (isPinValid) {
       let verifyResponse = await verify(action: action, username: username)
       
       if let error = verifyResponse.error {
@@ -174,14 +174,10 @@ public class AuthsignalInApp {
         return AuthsignalResponse(data: data)
       }
     }
-
-    let data = VerifyPinResponse(
-      isVerified: false,
-      token: nil,
-      userId: nil
-    )
     
-    return AuthsignalResponse(data: data)
+    return AuthsignalResponse(
+      data: VerifyPinResponse(isVerified: false)
+    )
   }
   
   public func deletePin(username: String) async -> AuthsignalResponse<Bool> {
