@@ -6,6 +6,7 @@ public class AuthsignalInApp {
   private let api: InAppAPIClient
   private let cache = TokenCache.shared
   private let keyManager = KeyManager(keySuffix: "in_app")
+  private let pinManager = PinManager()
 
   public init(tenantID: String, baseURL: String) {
     api = InAppAPIClient(tenantID: tenantID, baseURL: baseURL)
@@ -136,4 +137,60 @@ public class AuthsignalInApp {
       return AuthsignalResponse(data: response.data!)
     }
   }
-} 
+  
+  public func createPin(pin: String, username: String, token: String? = nil) async -> AuthsignalResponse<AppCredential> {
+    guard pinManager.validateFormat(pin: pin) else {
+      return AuthsignalResponse(
+        error: "Invalid PIN format.",
+        errorCode: SdkErrorCodes.invalidPinFormat
+      )
+    }
+    
+    pinManager.createPin(pin: pin, username: username)
+    
+    return await addCredential(token: token, username: username)
+  }
+  
+  public func verifyPin(pin: String, username: String, action: String? = nil) async -> AuthsignalResponse<VerifyPinResponse> {
+    let isVerified = pinManager.verifyPin(pin: pin, username: username)
+    
+    if (isVerified) {
+      let verifyResponse = await verify(action: action, username: username)
+      
+      if let error = verifyResponse.error {
+        return AuthsignalResponse(
+          error: error,
+          errorCode: verifyResponse.errorCode
+        )
+      }
+      
+      if let verifyResponseData = verifyResponse.data {
+        let data = VerifyPinResponse(
+          isVerified: true,
+          token: verifyResponseData.token,
+          userId: verifyResponseData.userId
+        )
+        
+        return AuthsignalResponse(data: data)
+      }
+    }
+
+    let data = VerifyPinResponse(
+      isVerified: false,
+      token: nil,
+      userId: nil
+    )
+    
+    return AuthsignalResponse(data: data)
+  }
+  
+  public func deletePin(username: String) async -> AuthsignalResponse<Bool> {
+    pinManager.deletePin(username: username)
+    
+    return await removeCredential(username: username)
+  }
+
+  public func getAllUsernames() async -> [String] {
+    return pinManager.getAllUsernames()
+  }
+}
