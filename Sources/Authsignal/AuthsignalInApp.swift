@@ -186,7 +186,9 @@ public class AuthsignalInApp {
     return await removeCredential(username: username)
   }
 
-  public func getAllUsernames() async -> [String] {
-    return pinManager.getAllUsernames()
+  public func getAllUsernames() async -> AuthsignalResponse<[String]> {
+    let usernames = pinManager.getAllUsernames()
+    
+    return AuthsignalResponse(data: usernames)
   }
 }
