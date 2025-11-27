@@ -181,12 +181,16 @@ public class AuthsignalInApp {
   }
   
   public func deletePin(username: String) async -> AuthsignalResponse<Bool> {
-    pinManager.deletePin(username: username)
+    let removeCredentialResponse = await removeCredential(username: username)
     
-    return await removeCredential(username: username)
+    if removeCredentialResponse.error == nil, removeCredentialResponse.data == true {
+      pinManager.deletePin(username: username)
+    }
+    
+    return removeCredentialResponse
   }
 
-  public func getAllUsernames() async -> AuthsignalResponse<[String]> {
+  public func getAllPinUsernames() async -> AuthsignalResponse<[String]> {
     let usernames = pinManager.getAllUsernames()
     
     return AuthsignalResponse(data: usernames)
