@@ -92,7 +92,7 @@ public class AuthsignalInApp {
     let response = await api.removeCredential(publicKey: publicKey, signature: signature)
 
     return AuthsignalResponse(
-      data: keyManager.deleteKeyPair(),
+      data: keyManager.deleteKeyPair(username: username),
       error: response.error,
       errorCode: response.errorCode
     )
