@@ -63,7 +63,7 @@ public class AuthsignalPasskey {
       )
     }
     
-    UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
+    storeCredentialId(credentialId: credential.rawId, username: optsResponse.data?.options.user.name)
 
     cache.token = responseToken
   
@@ -136,7 +136,7 @@ public class AuthsignalPasskey {
     )
     
     if (data.isVerified) {
-      UserDefaults.standard.set(credential.rawId, forKey: passkeyLocalKey)
+      storeCredentialId(credentialId: credential.rawId, username: data.username)
     }
     
     if let responseToken = data.accessToken {
@@ -158,8 +158,8 @@ public class AuthsignalPasskey {
     }
   }
   
-  public func shouldPromptToCreatePasskey() async -> AuthsignalResponse<Bool> {
-    guard let credentialId = UserDefaults.standard.string(forKey: passkeyLocalKey) else {
+  public func shouldPromptToCreatePasskey(username: String? = nil) async -> AuthsignalResponse<Bool> {
+    guard let credentialId = getStoredCredentialId(username: username) else {
       return AuthsignalResponse(data: true)
     }
     
@@ -178,7 +178,7 @@ public class AuthsignalPasskey {
   
   @available(*, deprecated, message: "Use 'preferImmediatelyAvailableCredentials' to control what happens when a passkey isn't available.")
   public func isAvailableOnDevice() async -> AuthsignalResponse<Bool> {
-    guard let credentialId = UserDefaults.standard.string(forKey: passkeyLocalKey) else {
+    guard let credentialId = getStoredCredentialId(username: nil) else {
       return AuthsignalResponse(data: false)
     }
     
@@ -193,5 +193,19 @@ public class AuthsignalPasskey {
     } else {
       return AuthsignalResponse(data: true)
     }
+  }
+
+  private func storeCredentialId(credentialId: String, username: String?) {
+    UserDefaults.standard.set(credentialId, forKey: passkeyLocalKey)
+    
+    if let username = username {
+      UserDefaults.standard.set(credentialId, forKey: "\(passkeyLocalKey)_\(username)")
+    }
+  }
+  
+  private func getStoredCredentialId(username: String?) -> String? {
+    let key = username.map { "\(passkeyLocalKey)_\($0)" } ?? passkeyLocalKey
+    
+    return UserDefaults.standard.string(forKey: key)
   }
 }

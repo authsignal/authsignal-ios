@@ -16,6 +16,7 @@ public struct RegistrationOptsRelyingParty: Codable {
 
 public struct RegistrationOptsUser: Codable {
   public let id: String
+  public let name: String
   public let displayName: String
 }
 
