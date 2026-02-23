@@ -11,6 +11,8 @@ public class Authsignal {
   public let sms: AuthsignalSMS
   public let totp: AuthsignalTOTP
   public let whatsapp: AuthsignalWhatsApp
+  
+  private let _deviceID: String?
 
   public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
     inapp = AuthsignalInApp(tenantID: tenantID, baseURL: baseURL)
@@ -21,9 +23,19 @@ public class Authsignal {
     sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL)
     totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL)
     whatsapp = AuthsignalWhatsApp(tenantID: tenantID, baseURL: baseURL)
+    
+    _deviceID = deviceID
   }
   
   public func setToken(token: String) {
     TokenCache.shared.token = token
+  }
+  
+  public func getDeviceID() async -> String {
+    if (_deviceID != nil) {
+      return _deviceID!
+    }
+    
+    return await DeviceCache.shared.getDefaultDeviceID()
   }
 }
