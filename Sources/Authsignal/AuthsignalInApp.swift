@@ -41,7 +41,8 @@ public class AuthsignalInApp {
     token: String? = nil,
     keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly,
     userPresenceRequired: Bool = false,
-    username: String? = nil
+    username: String? = nil,
+    appAttestation: AppAttestation? = nil
   ) async -> AuthsignalResponse<AppCredential> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
     
@@ -58,7 +59,8 @@ public class AuthsignalInApp {
     let response = await api.addCredential(
       token: userToken,
       publicKey: publicKey,
-      deviceName: deviceName
+      deviceName: deviceName,
+      appAttestation: appAttestation
     )
     
     guard let data = response.data else {
