@@ -70,7 +70,7 @@ public class AuthsignalInApp {
           let attestationData = try await DCAppAttestService.shared.attestKey(keyId, clientDataHash: nonceHash)
           let attestationToken = attestationData.base64EncodedString()
 
-          resolvedAttestation = AppAttestation(token: attestationToken, keyId: keyId)
+          resolvedAttestation = AppAttestation(attestationToken: attestationToken, keyId: keyId)
         } catch {
           Logger.error("App Attest failed: \(error.localizedDescription)")
           resolvedAttestation = nil

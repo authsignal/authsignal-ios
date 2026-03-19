@@ -14,7 +14,7 @@ public struct AddCredentialRequest: Codable {
     self.deviceName = deviceName
     self.devicePlatform = devicePlatform
     self.appAttestation = appAttestation.map {
-      AddCredentialAppAttestation(provider: "APP_ATTEST", token: $0.token, keyId: $0.keyId)
+      AddCredentialAppAttestation(provider: "APP_ATTEST", token: $0.attestationToken, keyId: $0.keyId)
     }
   }
 }
