@@ -1,9 +1,9 @@
 public struct AppAttestation: Codable {
-  public let token: String
+  public let attestationToken: String
   public let keyId: String?
 
-  public init(token: String, keyId: String? = nil) {
-    self.token = token
+  public init(attestationToken: String, keyId: String? = nil) {
+    self.attestationToken = attestationToken
     self.keyId = keyId
   }
 }

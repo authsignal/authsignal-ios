@@ -1,14 +1,18 @@
 import Foundation
 import Security
 import UIKit
+import DeviceCheck
+import CryptoKit
 
 public class AuthsignalInApp {
   private let api: InAppAPIClient
   private let cache = TokenCache.shared
   private let keyManager = KeyManager(keySuffix: "in_app")
   private let pinManager = PinManager()
+  private let tenantID: String
 
   public init(tenantID: String, baseURL: String) {
+    self.tenantID = tenantID
     api = InAppAPIClient(tenantID: tenantID, baseURL: baseURL)
   }
 
@@ -42,10 +46,10 @@ public class AuthsignalInApp {
     keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly,
     userPresenceRequired: Bool = false,
     username: String? = nil,
-    appAttestation: AppAttestation? = nil
+    appAttestation: Bool = false
   ) async -> AuthsignalResponse<AppCredential> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
-    
+
     guard let publicKey = keyManager.getOrCreatePublicKey(
       keychainAccess: keychainAccess,
       userPresenceRequired: userPresenceRequired,
@@ -54,19 +58,42 @@ public class AuthsignalInApp {
       return AuthsignalResponse(errorCode: SdkErrorCodes.createKeyPairFailed)
     }
 
+    var resolvedAttestation: AppAttestation? = nil
+    if appAttestation {
+      if #available(iOS 14.0, *), DCAppAttestService.shared.isSupported {
+        do {
+          guard let idempotencyKey = Self.extractIdempotencyKey(from: userToken) else {
+            return AuthsignalResponse(error: "Failed to extract idempotencyKey from token", errorCode: "invalid_token")
+          }
+
+          let nonce = idempotencyKey
+          let nonceData = Data(nonce.utf8)
+          let nonceHash = Data(SHA256.hash(data: nonceData))
+
+          let keyId = try await DCAppAttestService.shared.generateKey()
+          let attestationData = try await DCAppAttestService.shared.attestKey(keyId, clientDataHash: nonceHash)
+          let attestationToken = attestationData.base64EncodedString()
+
+          resolvedAttestation = AppAttestation(attestationToken: attestationToken, keyId: keyId)
+        } catch {
+          Logger.error("App Attest failed: \(error.localizedDescription)")
+        }
+      }
+    }
+
     let deviceName = await UIDevice.current.name
 
     let response = await api.addCredential(
       token: userToken,
       publicKey: publicKey,
       deviceName: deviceName,
-      appAttestation: appAttestation
+      appAttestation: resolvedAttestation
     )
-    
+
     guard let data = response.data else {
       return AuthsignalResponse(error: response.error, errorCode: response.errorCode)
     }
-    
+
     let credential = AppCredential(
       credentialId: data.userAuthenticatorId,
       createdAt: data.verifiedAt,
@@ -194,7 +221,19 @@ public class AuthsignalInApp {
 
   public func getAllPinUsernames() async -> AuthsignalResponse<[String]> {
     let usernames = pinManager.getAllUsernames()
-    
+
     return AuthsignalResponse(data: usernames)
+  }
+
+  private static func extractIdempotencyKey(from token: String) -> String? {
+    let parts = token.split(separator: ".")
+    guard parts.count >= 2 else { return nil }
+
+    let payload = String(parts[1]).base64URLUnescaped()
+    guard let data = Data(base64Encoded: payload) else { return nil }
+    guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+    guard let other = json["other"] as? [String: Any] else { return nil }
+
+    return other["idempotencyKey"] as? String
   }
 }
