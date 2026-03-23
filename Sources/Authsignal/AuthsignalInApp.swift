@@ -46,7 +46,7 @@ public class AuthsignalInApp {
     keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly,
     userPresenceRequired: Bool = false,
     username: String? = nil,
-    appAttestation: Bool = false
+    deviceIntegrity: Bool = false
   ) async -> AuthsignalResponse<AppCredential> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
 
@@ -58,8 +58,8 @@ public class AuthsignalInApp {
       return AuthsignalResponse(errorCode: SdkErrorCodes.createKeyPairFailed)
     }
 
-    var resolvedAttestation: AppAttestation? = nil
-    if appAttestation {
+    var resolvedIntegrity: DeviceIntegrity? = nil
+    if deviceIntegrity {
       if #available(iOS 14.0, *), DCAppAttestService.shared.isSupported {
         do {
           guard let idempotencyKey = Self.extractIdempotencyKey(from: userToken) else {
@@ -71,10 +71,10 @@ public class AuthsignalInApp {
           let nonceHash = Data(SHA256.hash(data: nonceData))
 
           let keyId = try await DCAppAttestService.shared.generateKey()
-          let attestationData = try await DCAppAttestService.shared.attestKey(keyId, clientDataHash: nonceHash)
-          let attestationToken = attestationData.base64EncodedString()
+          let integrityData = try await DCAppAttestService.shared.attestKey(keyId, clientDataHash: nonceHash)
+          let integrityToken = integrityData.base64EncodedString()
 
-          resolvedAttestation = AppAttestation(attestationToken: attestationToken, keyId: keyId)
+          resolvedIntegrity = DeviceIntegrity(integrityToken: integrityToken, keyId: keyId)
         } catch {
           Logger.error("App Attest failed: \(error.localizedDescription)")
         }
@@ -87,7 +87,7 @@ public class AuthsignalInApp {
       token: userToken,
       publicKey: publicKey,
       deviceName: deviceName,
-      appAttestation: resolvedAttestation
+      deviceIntegrity: resolvedIntegrity
     )
 
     guard let data = response.data else {
