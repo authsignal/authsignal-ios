@@ -13,7 +13,7 @@ class InAppAPIClient: BaseAPIClient {
     token: String,
     publicKey: String,
     deviceName: String,
-    appAttestation: AppAttestation? = nil
+    deviceIntegrity: DeviceIntegrity? = nil
   ) async -> AuthsignalResponse<AddCredentialResponse>
   {
     let url = "\(baseURL)/client/user-authenticators/in-app"
@@ -22,7 +22,7 @@ class InAppAPIClient: BaseAPIClient {
       publicKey: publicKey,
       deviceName: deviceName,
       devicePlatform: "ios",
-      appAttestation: appAttestation
+      deviceIntegrity: deviceIntegrity
     )
 
     return await postRequest(url: url, body: body, token: token)
