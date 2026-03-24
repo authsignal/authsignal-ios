@@ -76,7 +76,7 @@ public class AuthsignalInApp {
 
           resolvedIntegrity = DeviceIntegrity(integrityToken: integrityToken, keyId: keyId)
         } catch {
-          Logger.error("App Attest failed: \(error.localizedDescription)")
+          // Device integrity attestation failed silently
         }
       }
     }
