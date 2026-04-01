@@ -46,7 +46,7 @@ public class AuthsignalInApp {
     keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly,
     userPresenceRequired: Bool = false,
     username: String? = nil,
-    deviceIntegrity: Bool = false
+    performAttestation: Bool = false
   ) async -> AuthsignalResponse<AppCredential> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
 
@@ -59,7 +59,7 @@ public class AuthsignalInApp {
     }
 
     var resolvedIntegrity: DeviceIntegrity? = nil
-    if deviceIntegrity {
+    if performAttestation {
       if #available(iOS 14.0, *), DCAppAttestService.shared.isSupported {
         do {
           guard let idempotencyKey = Self.extractIdempotencyKey(from: userToken) else {
@@ -87,7 +87,7 @@ public class AuthsignalInApp {
       token: userToken,
       publicKey: publicKey,
       deviceName: deviceName,
-      deviceIntegrity: resolvedIntegrity
+      performAttestation: resolvedIntegrity
     )
 
     guard let data = response.data else {
