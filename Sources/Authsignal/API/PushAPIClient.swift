@@ -13,7 +13,7 @@ class PushAPIClient: BaseAPIClient {
     token: String,
     publicKey: String,
     deviceName: String,
-    performAttestation: DeviceIntegrity? = nil
+    performAttestation: AppAttestationResult? = nil
   ) async -> AuthsignalResponse<AddCredentialResponse>
   {
     let url = "\(baseURL)/client/user-authenticators/push"

@@ -3,7 +3,7 @@ import DeviceCheck
 import CryptoKit
 
 class AppAttestation {
-  static func resolveIntegrity(token: String) async -> DeviceIntegrity? {
+  static func resolveIntegrity(token: String) async -> AppAttestationResult? {
     if #available(iOS 14.0, *), DCAppAttestService.shared.isSupported {
       do {
         guard let idempotencyKey = extractIdempotencyKey(from: token) else {
@@ -18,7 +18,7 @@ class AppAttestation {
         let integrityData = try await DCAppAttestService.shared.attestKey(keyId, clientDataHash: nonceHash)
         let integrityToken = integrityData.base64EncodedString()
 
-        return DeviceIntegrity(integrityToken: integrityToken, keyId: keyId)
+        return AppAttestationResult(integrityToken: integrityToken, keyId: keyId)
       } catch {
         Logger.error("App Attest failed: \(error.localizedDescription)")
       }
