@@ -3,7 +3,7 @@ import DeviceCheck
 import CryptoKit
 
 class AppAttestation {
-  static func resolveIntegrity(token: String) async -> AppAttestationResult? {
+  static func resolve(token: String) async -> AppAttestationResult? {
     if #available(iOS 14.0, *), DCAppAttestService.shared.isSupported {
       do {
         guard let idempotencyKey = extractIdempotencyKey(from: token) else {

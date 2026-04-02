@@ -51,7 +51,7 @@ public class AuthsignalQRCode {
       return AuthsignalResponse(errorCode: SdkErrorCodes.createKeyPairFailed)
     }
 
-    let resolvedIntegrity = performAttestation ? await AppAttestation.resolveIntegrity(token: userToken) : nil
+    let attestationResult = performAttestation ? await AppAttestation.resolve(token: userToken) : nil
 
     let deviceName = await UIDevice.current.name
 
@@ -59,7 +59,7 @@ public class AuthsignalQRCode {
       token: userToken,
       publicKey: publicKey,
       deviceName: deviceName,
-      performAttestation: resolvedIntegrity
+      performAttestation: attestationResult
     )
     
     guard let data = response.data else {
