@@ -12,7 +12,8 @@ class PushAPIClient: BaseAPIClient {
   func addCredential(
     token: String,
     publicKey: String,
-    deviceName: String
+    deviceName: String,
+    performAttestation: DeviceIntegrity? = nil
   ) async -> AuthsignalResponse<AddCredentialResponse>
   {
     let url = "\(baseURL)/client/user-authenticators/push"
@@ -20,7 +21,8 @@ class PushAPIClient: BaseAPIClient {
     let body = AddCredentialRequest(
       publicKey: publicKey,
       deviceName: deviceName,
-      devicePlatform: "ios"
+      devicePlatform: "ios",
+      performAttestation: performAttestation
     )
 
     return await postRequest(url: url, body: body, token: token)
