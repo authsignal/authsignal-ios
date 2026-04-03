@@ -31,10 +31,12 @@ class PasskeyAPIClient: BaseAPIClient {
   ) async -> AuthsignalResponse<AddPasskeyAuthenticatorResponse> {
     let url = "\(baseURL)/client/user-authenticators/passkey"
 
+    let defaultDeviceID = await DeviceCache.shared.getDefaultDeviceID()
+
     let body = AddPasskeyAuthenticatorRequest(
       challengeId: challengeId,
       registrationCredential: credential,
-      deviceId: self.deviceID ?? defaultDeviceID()
+      deviceId: self.deviceID ?? defaultDeviceID
     )
 
     return await postRequest(url: url, body: body, token: token)
@@ -47,10 +49,12 @@ class PasskeyAPIClient: BaseAPIClient {
   ) async -> AuthsignalResponse<VerifyPasskeyResponse> {
     let url = "\(baseURL)/client/verify/passkey"
 
+    let defaultDeviceID = await DeviceCache.shared.getDefaultDeviceID()
+
     let body = VerifyPasskeyRequest(
       challengeId: challengeId,
       authenticationCredential: credential,
-      deviceId: self.deviceID ?? defaultDeviceID()
+      deviceId: self.deviceID ?? defaultDeviceID
     )
 
     return await postRequest(url: url, body: body, token: token)

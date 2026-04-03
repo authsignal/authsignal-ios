@@ -118,18 +118,4 @@ class BaseAPIClient {
       return AuthsignalResponse(error: error.localizedDescription, errorCode: "network_error")
     }
   }
-  
-  lazy var defaultDeviceID = {
-    let defaultDeviceLocalKey = "@as_device_id"
-    
-    if let defaultDeviceID = UserDefaults.standard.string(forKey: defaultDeviceLocalKey) {
-      return defaultDeviceID
-    }
-    
-    let newDefaultDeviceID = UUID().uuidString
-    
-    UserDefaults.standard.set(newDefaultDeviceID, forKey: defaultDeviceLocalKey)
-    
-    return newDefaultDeviceID
-  }
 }
