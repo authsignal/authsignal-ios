@@ -1,4 +1,4 @@
-public struct DeviceIntegrity: Codable {
+public struct AppAttestationResult: Codable {
   public let integrityToken: String
   public let keyId: String?
 

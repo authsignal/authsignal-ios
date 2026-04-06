@@ -12,7 +12,8 @@ class QRCodeAPIClient: BaseAPIClient {
   func addCredential(
     token: String,
     publicKey: String,
-    deviceName: String
+    deviceName: String,
+    performAttestation: AppAttestationResult? = nil
   ) async -> AuthsignalResponse<AddCredentialResponse>
   {
     let url = "\(baseURL)/client/user-authenticators/qr-code"
@@ -20,7 +21,8 @@ class QRCodeAPIClient: BaseAPIClient {
     let body = AddCredentialRequest(
       publicKey: publicKey,
       deviceName: deviceName,
-      devicePlatform: "ios"
+      devicePlatform: "ios",
+      performAttestation: performAttestation
     )
 
     return await postRequest(url: url, body: body, token: token)

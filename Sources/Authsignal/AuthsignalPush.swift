@@ -39,10 +39,11 @@ public class AuthsignalPush {
   public func addCredential(
     token: String? = nil,
     keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly,
-    userPresenceRequired: Bool = false
+    userPresenceRequired: Bool = false,
+    performAttestation: Bool = false
   ) async -> AuthsignalResponse<AppCredential> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
-    
+
     guard let publicKey = keyManager.getOrCreatePublicKey(
       keychainAccess: keychainAccess,
       userPresenceRequired: userPresenceRequired
@@ -50,12 +51,15 @@ public class AuthsignalPush {
       return AuthsignalResponse(errorCode: SdkErrorCodes.createKeyPairFailed)
     }
 
+    let attestationResult = performAttestation ? await AppAttestation.resolve(token: userToken) : nil
+
     let deviceName = await UIDevice.current.name
 
     let response = await api.addCredential(
       token: userToken,
       publicKey: publicKey,
-      deviceName: deviceName
+      deviceName: deviceName,
+      performAttestation: attestationResult
     )
     
     guard let data = response.data else {
@@ -162,4 +166,5 @@ public class AuthsignalPush {
       return AuthsignalResponse(data: response.data != nil)
     }
   }
+
 }
