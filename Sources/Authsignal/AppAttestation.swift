@@ -3,15 +3,10 @@ import DeviceCheck
 import CryptoKit
 
 class AppAttestation {
-  static func resolve(token: String) async -> AppAttestationResult? {
+  static func resolve(nonce: String) async -> AppAttestationResult? {
     if #available(iOS 14.0, *), DCAppAttestService.shared.isSupported {
       do {
-        guard let idempotencyKey = extractIdempotencyKey(from: token) else {
-          Logger.error("Failed to extract idempotencyKey from token")
-          return nil
-        }
-
-        let nonceData = Data(idempotencyKey.utf8)
+        let nonceData = Data(nonce.utf8)
         let nonceHash = Data(SHA256.hash(data: nonceData))
 
         let keyId = try await DCAppAttestService.shared.generateKey()
