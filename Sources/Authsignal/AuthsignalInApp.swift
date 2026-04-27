@@ -56,11 +56,17 @@ public class AuthsignalInApp {
       return AuthsignalResponse(errorCode: SdkErrorCodes.createKeyPairFailed)
     }
 
-    let challengeResponse = await api.challenge(token: userToken)
+    var attestationResult: AppAttestationResult? = nil
 
-    let nonce = challengeResponse.data?.nonce
+    if performAttestation {
+      let challengeResponse = await api.challenge(token: userToken)
 
-    let attestationResult = performAttestation ? await AppAttestation.resolve(nonce: nonce) : nil
+      guard let nonce = challengeResponse.data?.nonce else {
+        return AuthsignalResponse(error: challengeResponse.error ?? "Error generating challenge.")
+      }
+
+      attestationResult = await AppAttestation.resolve(nonce: nonce)
+    }
 
     let deviceName = await UIDevice.current.name
 
