@@ -3,7 +3,19 @@ import DeviceCheck
 import CryptoKit
 
 class AppAttestation {
-  static func resolve(nonce: String) async -> AppAttestationResult? {
+  static func resolve(api: BaseAPIClient, token: String, performAttestation: Bool) async -> AuthsignalResponse<AppAttestationResult?> {
+    guard performAttestation else { return AuthsignalResponse(data: nil) }
+
+    let challengeResponse = await api.challenge(token: token)
+
+    guard let nonce = challengeResponse.data?.nonce else {
+      return AuthsignalResponse(error: challengeResponse.error ?? "Error generating challenge.")
+    }
+
+    return AuthsignalResponse(data: await resolve(nonce: nonce))
+  }
+
+  private static func resolve(nonce: String) async -> AppAttestationResult? {
     if #available(iOS 14.0, *), DCAppAttestService.shared.isSupported {
       do {
         let nonceData = Data(nonce.utf8)
@@ -20,17 +32,5 @@ class AppAttestation {
     }
 
     return nil
-  }
-
-  private static func extractIdempotencyKey(from token: String) -> String? {
-    let parts = token.split(separator: ".")
-    guard parts.count >= 2 else { return nil }
-
-    let payload = String(parts[1]).base64URLUnescaped()
-    guard let data = Data(base64Encoded: payload) else { return nil }
-    guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
-    guard let other = json["other"] as? [String: Any] else { return nil }
-
-    return other["idempotencyKey"] as? String
   }
 }
