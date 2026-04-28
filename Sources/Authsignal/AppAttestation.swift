@@ -12,7 +12,9 @@ class AppAttestation {
       return AuthsignalResponse(error: challengeResponse.error ?? "Error generating challenge.")
     }
 
-    return AuthsignalResponse(data: await attest(nonce: nonce))
+    let attestationResult = await attest(nonce: nonce)
+
+    return AuthsignalResponse(data: attestationResult)
   }
 
   private static func attest(nonce: String) async -> AppAttestationResult? {
