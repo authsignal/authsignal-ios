@@ -12,10 +12,10 @@ class AppAttestation {
       return AuthsignalResponse(error: challengeResponse.error ?? "Error generating challenge.")
     }
 
-    return AuthsignalResponse(data: await resolve(nonce: nonce))
+    return AuthsignalResponse(data: await attest(nonce: nonce))
   }
 
-  private static func resolve(nonce: String) async -> AppAttestationResult? {
+  private static func attest(nonce: String) async -> AppAttestationResult? {
     if #available(iOS 14.0, *), DCAppAttestService.shared.isSupported {
       do {
         let nonceData = Data(nonce.utf8)
