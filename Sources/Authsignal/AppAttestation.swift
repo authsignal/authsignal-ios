@@ -3,15 +3,24 @@ import DeviceCheck
 import CryptoKit
 
 class AppAttestation {
-  static func resolve(token: String) async -> AppAttestationResult? {
+  static func resolve(api: BaseAPIClient, token: String, performAttestation: Bool) async -> AuthsignalResponse<AppAttestationResult?> {
+    guard performAttestation else { return AuthsignalResponse(data: nil) }
+
+    let challengeResponse = await api.challenge(token: token)
+
+    guard let nonce = challengeResponse.data?.nonce else {
+      return AuthsignalResponse(error: challengeResponse.error ?? "Error generating challenge.")
+    }
+
+    let attestationResult = await attest(nonce: nonce)
+
+    return AuthsignalResponse(data: attestationResult)
+  }
+
+  private static func attest(nonce: String) async -> AppAttestationResult? {
     if #available(iOS 14.0, *), DCAppAttestService.shared.isSupported {
       do {
-        guard let idempotencyKey = extractIdempotencyKey(from: token) else {
-          Logger.error("Failed to extract idempotencyKey from token")
-          return nil
-        }
-
-        let nonceData = Data(idempotencyKey.utf8)
+        let nonceData = Data(nonce.utf8)
         let nonceHash = Data(SHA256.hash(data: nonceData))
 
         let keyId = try await DCAppAttestService.shared.generateKey()
@@ -25,17 +34,5 @@ class AppAttestation {
     }
 
     return nil
-  }
-
-  private static func extractIdempotencyKey(from token: String) -> String? {
-    let parts = token.split(separator: ".")
-    guard parts.count >= 2 else { return nil }
-
-    let payload = String(parts[1]).base64URLUnescaped()
-    guard let data = Data(base64Encoded: payload) else { return nil }
-    guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
-    guard let other = json["other"] as? [String: Any] else { return nil }
-
-    return other["idempotencyKey"] as? String
   }
 }

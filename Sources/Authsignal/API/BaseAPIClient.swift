@@ -11,13 +11,14 @@ class BaseAPIClient {
     self.deviceID = deviceID
   }
 
-  func challenge(action: String? = nil) async -> AuthsignalResponse<ChallengeResponse> {
+  func challenge(action: String? = nil, token: String? = nil) async -> AuthsignalResponse<ChallengeResponse> {
     let url = "\(baseURL)/client/challenge"
 
     let body = ChallengeRequest(action: action)
 
-    return await postRequest(url: url, body: body)
+    return await postRequest(url: url, body: body, token: token)
   }
+  
 
   func getRequest<T: Decodable>(url: String, token: String? = nil) async -> AuthsignalResponse<T> {
     var request = URLRequest(url: URL(string: url)!)
