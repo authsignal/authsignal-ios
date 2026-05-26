@@ -13,6 +13,7 @@ class PushAPIClient: BaseAPIClient {
     token: String,
     publicKey: String,
     deviceName: String,
+    pushToken: String? = nil,
     performAttestation: AppAttestationResult? = nil
   ) async -> AuthsignalResponse<AddCredentialResponse>
   {
@@ -22,6 +23,7 @@ class PushAPIClient: BaseAPIClient {
       publicKey: publicKey,
       deviceName: deviceName,
       devicePlatform: "ios",
+      pushToken: pushToken,
       performAttestation: performAttestation
     )
 

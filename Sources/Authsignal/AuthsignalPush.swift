@@ -40,7 +40,8 @@ public class AuthsignalPush {
     token: String? = nil,
     keychainAccess: KeychainAccess = .whenUnlockedThisDeviceOnly,
     userPresenceRequired: Bool = false,
-    performAttestation: Bool = false
+    performAttestation: Bool = false,
+    pushToken: String? = nil
   ) async -> AuthsignalResponse<AppCredential> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
 
@@ -65,6 +66,7 @@ public class AuthsignalPush {
       token: userToken,
       publicKey: publicKey,
       deviceName: deviceName,
+      pushToken: pushToken,
       performAttestation: attestationResult
     )
     
