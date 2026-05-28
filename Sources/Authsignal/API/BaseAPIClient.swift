@@ -2,11 +2,13 @@ import Foundation
 
 class BaseAPIClient {
   let baseURL: String
+  let tenantID: String
   let basicAuth: String
   let deviceID: String?
 
   public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
     self.baseURL = baseURL
+    self.tenantID = tenantID
     self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
     self.deviceID = deviceID
   }
@@ -30,6 +32,8 @@ class BaseAPIClient {
     } else {
       request.setValue(basicAuth, forHTTPHeaderField: "Authorization")
     }
+
+    applyDefaultHeaders(to: &request)
   
     return await performRequest(request: request)
   }
@@ -39,6 +43,7 @@ class BaseAPIClient {
 
     request.httpMethod = "POST"
     request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    applyDefaultHeaders(to: &request)
 
     return await performRequest(request: request)
   }
@@ -63,7 +68,15 @@ class BaseAPIClient {
       request.httpBody = encodedBody
     }
 
+    applyDefaultHeaders(to: &request)
+
     return await performRequest(request: request)
+  }
+
+  private func applyDefaultHeaders(to request: inout URLRequest) {
+    AuthsignalRequestMetadata.headers(tenantID: tenantID).forEach { name, value in
+      request.setValue(value, forHTTPHeaderField: name)
+    }
   }
 
   private func performRequest<T: Decodable>(request: URLRequest) async -> AuthsignalResponse<T> {
