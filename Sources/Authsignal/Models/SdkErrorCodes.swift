@@ -3,6 +3,7 @@ struct SdkErrorCodes {
   static let invalidCredential = "invalid_credential"
   static let matchedExcludedCredential = "matched_excluded_credential"
   static let credentialNotFound = "credential_not_found"
+  static let unknownCredential = "unknown_credential"
   static let createKeyPairFailed = "create_key_pair_failed"
   static let invalidPinFormat = "invalid_pin_format"
 }
