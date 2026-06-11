@@ -133,7 +133,9 @@ public class AuthsignalPush {
       idempotencyKey: data.idempotencyKey,
       deviceId: data.deviceId,
       userAgent:data.userAgent,
-      ipAddress: data.ipAddress
+      ipAddress: data.ipAddress,
+      custom: data.custom,
+      user: data.user
     )
     
     return AuthsignalResponse(data: pushChallenge)
