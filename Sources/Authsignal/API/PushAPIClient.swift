@@ -44,12 +44,29 @@ class PushAPIClient: BaseAPIClient {
     return await postRequest(url: url, body: body)
   }
 
-  public func getChallenge(publicKey: String) async -> AuthsignalResponse<PushChallengeResponse> {
+  public func getChallenge(
+    publicKey: String,
+    signature: String? = nil
+  ) async -> AuthsignalResponse<PushChallengeResponse> {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
     let url = "\(baseURL)/client/user-authenticators/push/challenge?publicKey=\(encodedKey)"
 
-    return await getRequest(url: url)
+    var headers: [String: String] = [:]
+
+    if let signature = signature {
+      headers["X-Authsignal-Signature"] = signature
+    }
+
+    return await getRequest(url: url, headers: headers)
+  }
+
+  public func getChallengeNonce(publicKey: String) async -> AuthsignalResponse<PushChallengeNonceResponse> {
+    let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
+
+    let url = "\(baseURL)/client/user-authenticators/push/challenge/sign?publicKey=\(encodedKey)"
+
+    return await postRequest(url: url)
   }
 
   public func updateChallenge(

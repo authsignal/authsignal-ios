@@ -22,27 +22,37 @@ class BaseAPIClient {
   }
   
 
-  func getRequest<T: Decodable>(url: String, token: String? = nil) async -> AuthsignalResponse<T> {
+  func getRequest<T: Decodable>(url: String, token: String? = nil, headers: [String: String] = [:]) async -> AuthsignalResponse<T> {
     var request = URLRequest(url: URL(string: url)!)
 
     request.httpMethod = "GET"
-    
+
     if let token = token {
       request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     } else {
       request.setValue(basicAuth, forHTTPHeaderField: "Authorization")
     }
 
+    headers.forEach { name, value in
+      request.setValue(value, forHTTPHeaderField: name)
+    }
+
     applyDefaultHeaders(to: &request)
-  
+
     return await performRequest(request: request)
   }
 
-  func postRequest<T: Decodable>(url: String, token: String) async -> AuthsignalResponse<T> {
+  func postRequest<T: Decodable>(url: String, token: String? = nil) async -> AuthsignalResponse<T> {
     var request = URLRequest(url: URL(string: url)!)
 
     request.httpMethod = "POST"
-    request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+    if let token = token {
+      request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    } else {
+      request.setValue(basicAuth, forHTTPHeaderField: "Authorization")
+    }
+
     applyDefaultHeaders(to: &request)
 
     return await performRequest(request: request)

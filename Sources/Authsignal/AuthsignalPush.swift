@@ -112,7 +112,17 @@ public class AuthsignalPush {
       return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
     }
 
-    let response = await api.getChallenge(publicKey: publicKey)
+    var signature: String? = nil
+
+    if let secKey = keyManager.getKey() {
+      let nonceResponse = await api.getChallengeNonce(publicKey: publicKey)
+
+      if let nonce = nonceResponse.data?.message {
+        signature = Signature.sign(message: nonce, privateKey: secKey).data
+      }
+    }
+
+    let response = await api.getChallenge(publicKey: publicKey, signature: signature)
 
     if let error = response.error {
       return AuthsignalResponse(error: error, errorCode: response.errorCode)
@@ -133,7 +143,9 @@ public class AuthsignalPush {
       idempotencyKey: data.idempotencyKey,
       deviceId: data.deviceId,
       userAgent:data.userAgent,
-      ipAddress: data.ipAddress
+      ipAddress: data.ipAddress,
+      custom: data.custom,
+      user: data.user
     )
     
     return AuthsignalResponse(data: pushChallenge)
