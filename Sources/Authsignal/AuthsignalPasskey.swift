@@ -19,7 +19,7 @@ public class AuthsignalPasskey {
     username: String? = nil,
     displayName: String? = nil,
     ignorePasskeyAlreadyExistsError: Bool = false,
-    syncCredentials: Bool = true
+    syncCredentials: Bool = false
   ) async -> AuthsignalResponse<SignUpResponse> {
     guard let userToken = token ?? cache.token else { return cache.handleTokenNotSetError() }
     
@@ -96,7 +96,7 @@ public class AuthsignalPasskey {
     action: String? = nil,
     autofill: Bool = false,
     preferImmediatelyAvailableCredentials: Bool = true,
-    syncCredentials: Bool = true
+    syncCredentials: Bool = false
   ) async -> AuthsignalResponse<SignInResponse> {
     let userToken = action == nil ? token ?? cache.token : nil
     
