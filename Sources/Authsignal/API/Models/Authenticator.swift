@@ -8,9 +8,6 @@ public struct WebauthnCredential: Codable {
   public let credentialId: String
 }
 
-/// Builds the set of credential IDs to report to the system via the Signal API:
-/// every passkey the server currently accepts, plus the credential just used
-/// (in case the server list is briefly stale), de-duplicated.
 func buildAcceptedCredentialIds(
   authenticators: [Authenticator],
   currentCredentialId: String

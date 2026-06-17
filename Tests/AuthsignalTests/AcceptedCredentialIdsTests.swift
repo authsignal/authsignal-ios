@@ -2,9 +2,6 @@ import XCTest
 
 @testable import Authsignal
 
-/// Unit tests for the credential-ID assembly that feeds the iOS Signal API
-/// (reportAllAcceptedPublicKeyCredentials). Mirrors the browser SDK's filtering
-/// + de-dup logic.
 final class AcceptedCredentialIdsTests: XCTestCase {
   private func passkey(_ credentialId: String) -> Authenticator {
     Authenticator(

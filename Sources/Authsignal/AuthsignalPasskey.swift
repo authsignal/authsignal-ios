@@ -98,7 +98,6 @@ public class AuthsignalPasskey {
     preferImmediatelyAvailableCredentials: Bool = true,
     syncCredentials: Bool = true
   ) async -> AuthsignalResponse<SignInResponse> {
-    // Only use token if an action is not provided
     let userToken = action == nil ? token ?? cache.token : nil
     
     let challengeResponse = action != nil ? await api.challenge(action: action!) : nil
@@ -140,9 +139,6 @@ public class AuthsignalPasskey {
     )
     
     guard let data = verifyResponse.data else {
-      // The credential is no longer known to the server (e.g. the passkey was
-      // deleted from the Authsignal portal). Signal this to the system so it can
-      // remove or hide the stale passkey.
       if syncCredentials && verifyResponse.errorCode == SdkErrorCodes.unknownCredential {
         Logger.info("Passkey sync: signaling unknown credential to the system.")
 
@@ -267,9 +263,6 @@ public class AuthsignalPasskey {
 
     Logger.info("Passkey sync: reporting \(credentialIds.count) accepted credential(s) to the system.")
 
-    // The user handle stored against the passkey on the device is the UTF-8
-    // bytes of the WebAuthn user id (see PasskeyManager.register, which passes
-    // `Data(userId.utf8)` as the userID), so reconstruct those raw bytes here.
     let userHandleData = Data(userHandle.utf8)
 
     await passkeySignalManager.signalAllAcceptedCredentials(
