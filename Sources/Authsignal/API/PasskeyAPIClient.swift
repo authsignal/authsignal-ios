@@ -67,4 +67,12 @@ class PasskeyAPIClient: BaseAPIClient {
 
     return await getRequest(url: url)
   }
+
+  func getAuthenticators(
+    token: String
+  ) async -> AuthsignalResponse<[Authenticator]> {
+    let url = "\(baseURL)/client/user-authenticators"
+
+    return await getRequest(url: url, token: token)
+  }
 }
