@@ -151,6 +151,51 @@ public class AuthsignalPush {
     return AuthsignalResponse(data: pushChallenge)
   }
 
+  public func updateCredential(pushToken: String) async -> AuthsignalResponse<AppCredential> {
+    let secKey = keyManager.getKey()
+    let publicKey = keyManager.getPublicKey()
+
+    guard let secKey = secKey, let publicKey = publicKey else {
+      return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
+    }
+
+    let nonceResponse = await api.getSigningMessage(publicKey: publicKey)
+
+    guard let challengeId = nonceResponse.data?.challengeId, let nonce = nonceResponse.data?.message else {
+      return AuthsignalResponse(error: nonceResponse.error, errorCode: nonceResponse.errorCode)
+    }
+
+    let signatureResponse = Signature.sign(message: nonce, privateKey: secKey)
+
+    guard let signature = signatureResponse.data else {
+      return AuthsignalResponse(error: signatureResponse.error)
+    }
+
+    let response = await api.updateCredential(
+      challengeId: challengeId,
+      publicKey: publicKey,
+      signature: signature,
+      pushToken: pushToken
+    )
+
+    if let error = response.error {
+      return AuthsignalResponse(error: error, errorCode: response.errorCode)
+    }
+
+    guard let data = response.data else {
+      return AuthsignalResponse(error: response.error, errorCode: response.errorCode)
+    }
+
+    let credential = AppCredential(
+      credentialId: data.userAuthenticatorId,
+      createdAt: data.lastVerifiedAt,
+      userId: data.userId,
+      lastAuthenticatedAt: data.lastVerifiedAt
+    )
+
+    return AuthsignalResponse(data: credential)
+  }
+
   public func updateChallenge(
     challengeId: String,
     approved: Bool,
