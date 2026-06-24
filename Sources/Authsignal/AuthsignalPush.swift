@@ -159,13 +159,15 @@ public class AuthsignalPush {
       return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
     }
 
-    let nonceResponse = await api.getSigningMessage(publicKey: publicKey)
+    let signingMessageResponse = await api.getSigningMessage(publicKey: publicKey)
 
-    guard let challengeId = nonceResponse.data?.challengeId, let nonce = nonceResponse.data?.message else {
-      return AuthsignalResponse(error: nonceResponse.error, errorCode: nonceResponse.errorCode)
+    guard let challengeId = signingMessageResponse.data?.challengeId,
+          let messageToSign = signingMessageResponse.data?.message
+    else {
+      return AuthsignalResponse(error: signingMessageResponse.error, errorCode: signingMessageResponse.errorCode)
     }
 
-    let signatureResponse = Signature.sign(message: nonce, privateKey: secKey)
+    let signatureResponse = Signature.sign(message: messageToSign, privateKey: secKey)
 
     guard let signature = signatureResponse.data else {
       return AuthsignalResponse(error: signatureResponse.error)
