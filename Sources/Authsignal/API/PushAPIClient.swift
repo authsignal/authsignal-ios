@@ -69,7 +69,7 @@ class PushAPIClient: BaseAPIClient {
     return await postRequest(url: url)
   }
 
-  public func getSigningMessage(publicKey: String) async -> AuthsignalResponse<UpdateNonceResponse> {
+  public func getSigningMessage(publicKey: String) async -> AuthsignalResponse<SigningMessageResponse> {
     let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
 
     let url = "\(baseURL)/client/user-authenticators/push/update/sign?publicKey=\(encodedKey)"
