@@ -69,6 +69,32 @@ class PushAPIClient: BaseAPIClient {
     return await postRequest(url: url)
   }
 
+  public func getSigningMessage(publicKey: String) async -> AuthsignalResponse<SigningMessageResponse> {
+    let encodedKey = Data(publicKey.utf8).base64URLEncodedString()
+
+    let url = "\(baseURL)/client/user-authenticators/push/sign?publicKey=\(encodedKey)"
+
+    return await postRequest(url: url)
+  }
+
+  public func updateCredential(
+    challengeId: String,
+    publicKey: String,
+    signature: String,
+    pushToken: String
+  ) async -> AuthsignalResponse<UpdateCredentialResponse> {
+    let url = "\(baseURL)/client/user-authenticators/push"
+
+    let body = UpdateCredentialRequest(
+      challengeId: challengeId,
+      publicKey: publicKey,
+      signature: signature,
+      pushToken: pushToken
+    )
+
+    return await patchRequest(url: url, body: body)
+  }
+
   public func updateChallenge(
     challengeId: String,
     publicKey: String,

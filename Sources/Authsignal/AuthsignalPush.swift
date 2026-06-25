@@ -151,6 +151,51 @@ public class AuthsignalPush {
     return AuthsignalResponse(data: pushChallenge)
   }
 
+  public func updateCredential(pushToken: String) async -> AuthsignalResponse<UpdateCredentialResponse> {
+    let secKey = keyManager.getKey()
+    let publicKey = keyManager.getPublicKey()
+
+    guard let secKey = secKey, let publicKey = publicKey else {
+      return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
+    }
+
+    let signingMessageResponse = await api.getSigningMessage(publicKey: publicKey)
+
+    if let error = signingMessageResponse.error {
+      return AuthsignalResponse(error: error, errorCode: signingMessageResponse.errorCode)
+    }
+
+    // A 200 with missing fields is a protocol error, not a silent no-op.
+    guard let challengeId = signingMessageResponse.data?.challengeId,
+          let messageToSign = signingMessageResponse.data?.message
+    else {
+      return AuthsignalResponse(error: "Invalid signing message response.")
+    }
+
+    let signatureResponse = Signature.sign(message: messageToSign, privateKey: secKey)
+
+    guard let signature = signatureResponse.data else {
+      return AuthsignalResponse(error: signatureResponse.error)
+    }
+
+    let response = await api.updateCredential(
+      challengeId: challengeId,
+      publicKey: publicKey,
+      signature: signature,
+      pushToken: pushToken
+    )
+
+    if let error = response.error {
+      return AuthsignalResponse(error: error, errorCode: response.errorCode)
+    }
+
+    guard let data = response.data else {
+      return AuthsignalResponse(error: "Invalid update credential response.")
+    }
+
+    return AuthsignalResponse(data: data)
+  }
+
   public func updateChallenge(
     challengeId: String,
     approved: Bool,
