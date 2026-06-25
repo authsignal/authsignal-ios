@@ -83,7 +83,7 @@ class PushAPIClient: BaseAPIClient {
     signature: String,
     pushToken: String
   ) async -> AuthsignalResponse<UpdateCredentialResponse> {
-    let url = "\(baseURL)/client/user-authenticators/push/update"
+    let url = "\(baseURL)/client/user-authenticators/push"
 
     let body = UpdateCredentialRequest(
       challengeId: challengeId,
@@ -92,7 +92,7 @@ class PushAPIClient: BaseAPIClient {
       pushToken: pushToken
     )
 
-    return await postRequest(url: url, body: body)
+    return await patchRequest(url: url, body: body)
   }
 
   public func updateChallenge(

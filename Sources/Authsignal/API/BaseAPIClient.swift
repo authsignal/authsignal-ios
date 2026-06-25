@@ -83,6 +83,31 @@ class BaseAPIClient {
     return await performRequest(request: request)
   }
 
+  func patchRequest<T: Decodable, TBody: Encodable>(url: String, body: TBody, token: String? = nil)
+    async -> AuthsignalResponse<T>
+  {
+    var request = URLRequest(url: URL(string: url)!)
+
+    request.httpMethod = "PATCH"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+    if let token = token {
+      request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    } else {
+      request.setValue(basicAuth, forHTTPHeaderField: "Authorization")
+    }
+
+    let encoder = JSONEncoder()
+
+    if let encodedBody = try? encoder.encode(body) {
+      request.httpBody = encodedBody
+    }
+
+    applyDefaultHeaders(to: &request)
+
+    return await performRequest(request: request)
+  }
+
   private func applyDefaultHeaders(to request: inout URLRequest) {
     AuthsignalRequestMetadata.headers(tenantID: tenantID).forEach { name, value in
       request.setValue(value, forHTTPHeaderField: name)
