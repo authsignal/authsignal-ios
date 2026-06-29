@@ -30,7 +30,8 @@ public class AuthsignalPush {
       credentialId: data.userAuthenticatorId,
       createdAt: data.verifiedAt,
       userId: data.userId,
-      lastAuthenticatedAt: data.lastVerifiedAt
+      lastAuthenticatedAt: data.lastVerifiedAt,
+      expiresAt: data.expiresAt
     )
 
     return AuthsignalResponse(data: credential)
@@ -151,7 +152,10 @@ public class AuthsignalPush {
     return AuthsignalResponse(data: pushChallenge)
   }
 
-  public func updateCredential(pushToken: String) async -> AuthsignalResponse<UpdateCredentialResponse> {
+  public func updateCredential(
+    pushToken: String? = nil,
+    extend: Bool = false
+  ) async -> AuthsignalResponse<UpdateCredentialResponse> {
     let secKey = keyManager.getKey()
     let publicKey = keyManager.getPublicKey()
 
@@ -182,7 +186,8 @@ public class AuthsignalPush {
       challengeId: challengeId,
       publicKey: publicKey,
       signature: signature,
-      pushToken: pushToken
+      pushToken: pushToken,
+      extend: extend ? true : nil
     )
 
     if let error = response.error {
