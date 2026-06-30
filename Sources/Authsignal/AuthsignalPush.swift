@@ -154,7 +154,7 @@ public class AuthsignalPush {
 
   public func updateCredential(
     pushToken: String? = nil,
-    extend: Bool = false
+    resetExpiry: Bool = false
   ) async -> AuthsignalResponse<UpdateCredentialResponse> {
     let secKey = keyManager.getKey()
     let publicKey = keyManager.getPublicKey()
@@ -187,7 +187,7 @@ public class AuthsignalPush {
       publicKey: publicKey,
       signature: signature,
       pushToken: pushToken,
-      extend: extend ? true : nil
+      resetExpiry: resetExpiry ? true : nil
     )
 
     if let error = response.error {
