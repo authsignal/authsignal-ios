@@ -3,5 +3,5 @@ public struct CredentialResponse: Codable {
   public let verifiedAt: String
   public let userId: String
   public let lastVerifiedAt: String?
-  public let expiresAt: String?
+  public let expiresAt: Double?
 }
