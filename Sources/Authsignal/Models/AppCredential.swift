@@ -20,12 +20,4 @@ public struct AppCredential: Codable {
     self.lastAuthenticatedAt = lastAuthenticatedAt
     self.expiresAt = expiresAt
   }
-
-  public var isExpired: Bool {
-    guard let expiresAt = expiresAt else {
-      return false
-    }
-
-    return Date(timeIntervalSince1970: expiresAt) < Date()
-  }
 }
