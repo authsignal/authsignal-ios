@@ -5,14 +5,14 @@ public struct AppCredential: Codable {
   public let createdAt: String
   public let userId: String
   public let lastAuthenticatedAt: String?
-  public let expiresAt: Double?
+  public let expiresAt: String?
 
   public init(
     credentialId: String,
     createdAt: String,
     userId: String,
     lastAuthenticatedAt: String?,
-    expiresAt: Double? = nil
+    expiresAt: String? = nil
   ) {
     self.credentialId = credentialId
     self.createdAt = createdAt
