@@ -9,7 +9,7 @@ struct AuthsignalWrapperSDKMetadata {
 
 @objc public class AuthsignalRequestMetadata: NSObject {
   private static let nativeSDK = "ios"
-  private static let nativeVersion = "2.11.0"
+  private static let nativeVersion = "2.12.0"
   private static let nativeUserAgentToken = "AuthsignalIOSSDK"
   private static var wrapperSDKMetadata: AuthsignalWrapperSDKMetadata?
 
