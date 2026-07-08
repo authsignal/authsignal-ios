@@ -6,6 +6,7 @@ public struct AppChallenge: Codable {
   public let deviceId: String?
   public let userAgent: String?
   public let ipAddress: String?
+  public let expiresAt: Int?
   public let custom: [String: JSONValue]?
   public let user: ChallengeUserResponse?
 }

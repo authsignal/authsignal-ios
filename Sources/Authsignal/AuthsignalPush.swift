@@ -145,6 +145,7 @@ public class AuthsignalPush {
       deviceId: data.deviceId,
       userAgent:data.userAgent,
       ipAddress: data.ipAddress,
+      expiresAt: data.expiresAt,
       custom: data.custom,
       user: data.user
     )
