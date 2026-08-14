@@ -4,4 +4,6 @@ public struct UpdateCredentialResponse: Codable {
   public let lastVerifiedAt: String
   public let pushToken: String?
   public let expiresAt: String?
+  public let erroredAt: String?
+  public let errorCode: String?
 }

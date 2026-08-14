@@ -31,7 +31,9 @@ public class AuthsignalPush {
       createdAt: data.verifiedAt,
       userId: data.userId,
       lastAuthenticatedAt: data.lastVerifiedAt,
-      expiresAt: data.expiresAt
+      expiresAt: data.expiresAt,
+      erroredAt: data.erroredAt,
+      errorCode: data.errorCode
     )
 
     return AuthsignalResponse(data: credential)
