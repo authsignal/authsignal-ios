@@ -114,8 +114,7 @@ public class AuthsignalPasskey {
     }
 
     let credentialResponse = await passkeyManager.auth(
-      relyingPartyId: optsData.options.rpId,
-      challenge: optsData.options.challenge,
+      options: optsData.options,
       autofill: autofill,
       preferImmediatelyAvailableCredentials: preferImmediatelyAvailableCredentials
     )
