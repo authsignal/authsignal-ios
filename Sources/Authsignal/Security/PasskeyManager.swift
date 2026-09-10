@@ -102,8 +102,7 @@ class PasskeyManager: NSObject {
   }
 
   func auth(
-    relyingPartyId: String,
-    challenge: String,
+    options: AuthenticationOpts,
     autofill: Bool,
     preferImmediatelyAvailableCredentials: Bool
   ) async -> AuthsignalResponse<PasskeyAuthenticationCredential>
@@ -120,14 +119,13 @@ class PasskeyManager: NSObject {
       return AuthsignalResponse(error: "Credential assertion already in progress.")
     }
 
-    guard let challengeData = Data(base64URLEncoded: challenge) else {
-      return AuthsignalResponse(error: "Error encoding challenge.")
-    }
+    let request: ASAuthorizationPlatformPublicKeyCredentialAssertionRequest
 
-    let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
-      relyingPartyIdentifier: relyingPartyId)
-  
-    let request = provider.createCredentialAssertionRequest(challenge: challengeData)
+    do {
+      request = try Self.createAssertionRequest(options: options)
+    } catch {
+      return AuthsignalResponse(error: error.localizedDescription)
+    }
     
     let controller = ASAuthorizationController(authorizationRequests: [request])
 
@@ -190,6 +188,46 @@ class PasskeyManager: NSObject {
       Logger.error("Passkey authentication error: \(error)")
 
       return AuthsignalResponse(error: error.localizedDescription)
+    }
+  }
+
+  @available(iOS 15.0, *)
+  static func createAssertionRequest(
+    options: AuthenticationOpts
+  ) throws -> ASAuthorizationPlatformPublicKeyCredentialAssertionRequest {
+    guard let challengeData = Data(base64URLEncoded: options.challenge) else {
+      throw AssertionRequestError.invalidChallenge
+    }
+
+    let provider = ASAuthorizationPlatformPublicKeyCredentialProvider(
+      relyingPartyIdentifier: options.rpId)
+
+    let request = provider.createCredentialAssertionRequest(challenge: challengeData)
+
+    request.allowedCredentials = try options.allowCredentials.map { credential in
+      guard !credential.id.isEmpty,
+        let credentialID = Data(base64URLEncoded: credential.id), !credentialID.isEmpty
+      else {
+        throw AssertionRequestError.invalidCredentialId
+      }
+
+      return ASAuthorizationPlatformPublicKeyCredentialDescriptor(credentialID: credentialID)
+    }
+
+    return request
+  }
+
+  private enum AssertionRequestError: LocalizedError {
+    case invalidChallenge
+    case invalidCredentialId
+
+    var errorDescription: String? {
+      switch self {
+      case .invalidChallenge:
+        return "Error encoding challenge."
+      case .invalidCredentialId:
+        return "Error decoding allowed credential ID."
+      }
     }
   }
 
