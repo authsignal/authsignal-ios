@@ -204,7 +204,6 @@ class PasskeyManager: NSObject {
 
     let request = provider.createCredentialAssertionRequest(challenge: challengeData)
 
-    // Do not drop malformed IDs: an empty allow-list permits any discoverable credential.
     request.allowedCredentials = try options.allowCredentials.map { credential in
       guard !credential.id.isEmpty,
         let credentialID = Data(base64URLEncoded: credential.id), !credentialID.isEmpty
