@@ -82,6 +82,14 @@ class PasskeyManager: NSObject {
       )
 
       return AuthsignalResponse(data: registrationCredential)
+    } catch ASAuthorizationError.canceled {
+      self.controller = nil
+      self.continuation = nil
+
+      return AuthsignalResponse(
+        error: "The request was canceled by the user.",
+        errorCode: SdkErrorCodes.userCanceled
+      )
     } catch {
       self.controller = nil
       self.continuation = nil
