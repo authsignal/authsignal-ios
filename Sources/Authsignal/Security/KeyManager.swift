@@ -9,12 +9,19 @@ class KeyManager {
     keyTag = "\(keyTagPrefix)_\(keySuffix)"
   }
   
-  func getKey(username: String? = nil) -> SecKey? {
+  func getKey(username: String? = nil, includeFallbacks: Bool = true) -> SecKey? {
     let userKeyTag = getUserKeyTag(username: username)
-    let legacyKeyTag = getLegacyKeyTag()
-    
+
+    if let key = loadKey(tag: userKeyTag) {
+      return key
+    }
+
+    guard includeFallbacks else {
+      return nil
+    }
+
     // Fall back to legacy key tag for backwards compatibility
-    return loadKey(tag: userKeyTag) ?? loadKey(tag: legacyKeyTag)
+    return loadKey(tag: getLegacyKeyTag())
   }
 
   func getOrCreatePublicKey(
@@ -22,7 +29,7 @@ class KeyManager {
     userPresenceRequired: Bool = false,
     username: String? = nil
   ) -> String? {
-    let publicKey = getPublicKey(username: username)
+    let publicKey = getPublicKey(username: username, includeFallbacks: username == nil)
 
     if publicKey != nil {
       return publicKey
@@ -35,8 +42,8 @@ class KeyManager {
     )
   }
 
-  func getPublicKey(username: String? = nil) -> String? {
-    guard let secKey = getKey(username: username) else {
+  func getPublicKey(username: String? = nil, includeFallbacks: Bool = true) -> String? {
+    guard let secKey = getKey(username: username, includeFallbacks: includeFallbacks) else {
       return nil
     }
 
@@ -51,7 +58,11 @@ class KeyManager {
     if (success) {
       return true
     }
-    
+
+    guard username == nil else {
+      return false
+    }
+
     // Fall back to deleting legacy key
     let legacyKeyTag =  getLegacyKeyTag()
     
