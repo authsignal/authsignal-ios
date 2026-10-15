@@ -92,7 +92,10 @@ public class AuthsignalInApp {
     let publicKey = keyManager.getPublicKey(username: username)
 
     guard let secKey = secKey, let publicKey = publicKey else {
-      return AuthsignalResponse(data: false)
+      return AuthsignalResponse(
+        error: "No credential found on this device.",
+        errorCode: SdkErrorCodes.credentialNotFound
+      )
     }
 
     let signatureResponse = Signature.signWithTimeBasedMessage(privateKey: secKey)
@@ -103,11 +106,11 @@ public class AuthsignalInApp {
 
     let response = await api.removeCredential(publicKey: publicKey, signature: signature)
 
-    return AuthsignalResponse(
-      data: keyManager.deleteKeyPair(username: username),
-      error: response.error,
-      errorCode: response.errorCode
-    )
+    if let error = response.error {
+      return AuthsignalResponse(error: error, errorCode: response.errorCode)
+    }
+
+    return AuthsignalResponse(data: keyManager.deleteKeyPair(username: username))
   }
   
   public func verify(action: String? = nil, username: String? = nil) async -> AuthsignalResponse<InAppVerifyResponse> {
@@ -121,7 +124,10 @@ public class AuthsignalInApp {
     let publicKey = keyManager.getPublicKey(username: username)
 
     guard let secKey = secKey, let publicKey = publicKey else {
-      return AuthsignalResponse(errorCode: SdkErrorCodes.credentialNotFound)
+      return AuthsignalResponse(
+        error: "No credential found on this device.",
+        errorCode: SdkErrorCodes.credentialNotFound
+      )
     }
     
     let signatureResponse = Signature.sign(message: challengeId, privateKey: secKey)
@@ -194,12 +200,21 @@ public class AuthsignalInApp {
   
   public func deletePin(username: String) async -> AuthsignalResponse<Bool> {
     let removeCredentialResponse = await removeCredential(username: username)
-    
-    if removeCredentialResponse.error == nil, removeCredentialResponse.data == true {
-      pinManager.deletePin(username: username)
+
+    let credentialAlreadyRemoved = removeCredentialResponse.errorCode == SdkErrorCodes.invalidCredential ||
+      removeCredentialResponse.errorCode == SdkErrorCodes.credentialNotFound
+
+    if removeCredentialResponse.data != true && !credentialAlreadyRemoved {
+      return removeCredentialResponse
     }
-    
-    return removeCredentialResponse
+
+    if credentialAlreadyRemoved {
+      _ = keyManager.deleteKeyPair(username: username)
+    }
+
+    pinManager.deletePin(username: username)
+
+    return AuthsignalResponse(data: true)
   }
 
   public func getAllPinUsernames() async -> AuthsignalResponse<[String]> {

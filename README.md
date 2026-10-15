@@ -20,7 +20,7 @@ Add authsignal-ios to the dependencies value of your Package.swift.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/authsignal/authsignal-ios.git", from: "2.13.1")
+    .package(url: "https://github.com/authsignal/authsignal-ios.git", from: "2.13.2")
 ]
 ```
 
