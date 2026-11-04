@@ -1,7 +1,6 @@
 import XCTest
 @testable import Authsignal
 
-/// Each test plays the server's replies to an SDK call and checks how many times the SDK sent it.
 final class RetryScenarioTests: XCTestCase {
   let baseURL = "https://api.example.test/v1"
   let fastRetries = RetryPolicy(maxRetries: 2, baseDelay: 0.01, maxDelay: 1)
@@ -15,8 +14,6 @@ final class RetryScenarioTests: XCTestCase {
   override func tearDown() {
     URLProtocol.unregisterClass(StubURLProtocol.self)
   }
-
-  // MARK: - Passkey sign-in
 
   func testPasskeyOptionsAreRetriedAfterAServerError() async {
     StubURLProtocol.replies = [.status(503), .status(200, body: authenticationOptions)]
@@ -65,8 +62,6 @@ final class RetryScenarioTests: XCTestCase {
     XCTAssertEqual(response.data?.isVerified, true)
     XCTAssertEqual(StubURLProtocol.requestCount, 2)
   }
-
-  // MARK: - SMS
 
   func testSMSChallengeIsNotRetriedAfterATimeoutSoNoSecondSMSIsSent() async {
     StubURLProtocol.replies = [.failure(.timedOut)]
@@ -119,8 +114,6 @@ final class RetryScenarioTests: XCTestCase {
     XCTAssertEqual(StubURLProtocol.requestCount, 1)
   }
 
-  // MARK: - Limits
-
   func testGivesUpAfterMaxRetries() async {
     StubURLProtocol.replies = [.status(503), .status(503), .status(503), .status(503)]
 
@@ -141,8 +134,6 @@ final class RetryScenarioTests: XCTestCase {
     XCTAssertNil(response.data)
     XCTAssertEqual(StubURLProtocol.requestCount, 1)
   }
-
-  // MARK: - Helpers
 
   private func passkeyAPI() -> PasskeyAPIClient {
     let api = PasskeyAPIClient(tenantID: "tenant", baseURL: baseURL, deviceID: "device")
@@ -177,7 +168,6 @@ final class RetryScenarioTests: XCTestCase {
   )
 }
 
-/// Answers every request with the next reply in `replies`.
 final class StubURLProtocol: URLProtocol {
   enum Reply {
     case status(Int, body: String = "{}", headers: [String: String] = [:])

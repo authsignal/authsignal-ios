@@ -19,7 +19,6 @@ class BaseAPIClient {
 
     let body = ChallengeRequest(action: action)
 
-    // A repeat call only creates another challenge, which goes unused.
     return await postRequest(url: url, body: body, token: token, replaySafe: true)
   }
   
@@ -44,7 +43,6 @@ class BaseAPIClient {
     return await performRequest(request: request, replaySafe: true)
   }
 
-  /// - Parameter replaySafe: Whether calling the endpoint twice is harmless. See ``RetryPolicy``.
   func postRequest<T: Decodable>(url: String, token: String? = nil, replaySafe: Bool = false)
     async -> AuthsignalResponse<T>
   {
@@ -63,7 +61,6 @@ class BaseAPIClient {
     return await performRequest(request: request, replaySafe: replaySafe)
   }
 
-  /// - Parameter replaySafe: Whether calling the endpoint twice is harmless. See ``RetryPolicy``.
   func postRequest<T: Decodable, TBody: Encodable>(
     url: String,
     body: TBody,
@@ -177,8 +174,6 @@ class BaseAPIClient {
     }
   }
 
-  /// Sends the request, and sends it again after failures that ``RetryPolicy`` allows.
-  /// Returns the last attempt's response, or throws its error.
   private func send(request: URLRequest, replaySafe: Bool) async throws -> (Data, URLResponse) {
     var retries = 0
 
