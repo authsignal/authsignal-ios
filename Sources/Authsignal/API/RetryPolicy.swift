@@ -2,10 +2,8 @@ import Foundation
 
 struct RetryPolicy {
   let maxRetries: Int
-  let baseDelay: TimeInterval
-  let maxDelay: TimeInterval
-
-  static let `default` = RetryPolicy(maxRetries: 2, baseDelay: 0.5, maxDelay: 5)
+  var baseDelay: TimeInterval = 0.5
+  var maxDelay: TimeInterval = 5
 
   enum Outcome: Equatable {
     case notSent

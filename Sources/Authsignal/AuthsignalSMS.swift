@@ -6,8 +6,8 @@ public class AuthsignalSMS {
   private let api: SMSAPIClient
   private let cache = TokenCache.shared
   
-  public init(tenantID: String, baseURL: String) {
-    self.api = SMSAPIClient(tenantID: tenantID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String, retries: Int = 2) {
+    self.api = SMSAPIClient(tenantID: tenantID, baseURL: baseURL, retries: retries)
   }
 
   public func enroll(phoneNumber: String) async -> AuthsignalResponse<EnrollResponse> {

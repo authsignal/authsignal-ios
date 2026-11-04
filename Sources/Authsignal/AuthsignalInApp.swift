@@ -9,9 +9,9 @@ public class AuthsignalInApp {
   private let pinManager = PinManager()
   private let tenantID: String
 
-  public init(tenantID: String, baseURL: String) {
+  public init(tenantID: String, baseURL: String, retries: Int = 2) {
     self.tenantID = tenantID
-    api = InAppAPIClient(tenantID: tenantID, baseURL: baseURL)
+    api = InAppAPIClient(tenantID: tenantID, baseURL: baseURL, retries: retries)
   }
 
   public func getCredential(username: String? = nil) async -> AuthsignalResponse<AppCredential> {

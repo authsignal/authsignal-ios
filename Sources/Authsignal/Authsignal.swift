@@ -14,15 +14,15 @@ public class Authsignal {
 
   private let _deviceID: String?
 
-  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
-    inapp = AuthsignalInApp(tenantID: tenantID, baseURL: baseURL)
-    email = AuthsignalEmail(tenantID: tenantID, baseURL: baseURL)
-    passkey = AuthsignalPasskey(tenantID: tenantID, baseURL: baseURL, deviceID: deviceID)
-    push = AuthsignalPush(tenantID: tenantID, baseURL: baseURL)
-    qr = AuthsignalQRCode(tenantID: tenantID, baseURL: baseURL)
-    sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL)
-    totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL)
-    whatsapp = AuthsignalWhatsApp(tenantID: tenantID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String, deviceID: String? = nil, retries: Int = 2) {
+    inapp = AuthsignalInApp(tenantID: tenantID, baseURL: baseURL, retries: retries)
+    email = AuthsignalEmail(tenantID: tenantID, baseURL: baseURL, retries: retries)
+    passkey = AuthsignalPasskey(tenantID: tenantID, baseURL: baseURL, deviceID: deviceID, retries: retries)
+    push = AuthsignalPush(tenantID: tenantID, baseURL: baseURL, retries: retries)
+    qr = AuthsignalQRCode(tenantID: tenantID, baseURL: baseURL, retries: retries)
+    sms = AuthsignalSMS(tenantID: tenantID, baseURL: baseURL, retries: retries)
+    totp = AuthsignalTOTP(tenantID: tenantID, baseURL: baseURL, retries: retries)
+    whatsapp = AuthsignalWhatsApp(tenantID: tenantID, baseURL: baseURL, retries: retries)
 
     _deviceID = deviceID
   }

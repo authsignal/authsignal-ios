@@ -5,14 +5,15 @@ class BaseAPIClient {
   let tenantID: String
   let basicAuth: String
   let deviceID: String?
-  var retryPolicy = RetryPolicy.default
+  var retryPolicy: RetryPolicy
   var requestTimeout: TimeInterval = 20
 
-  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
+  public init(tenantID: String, baseURL: String, deviceID: String? = nil, retries: Int = 2) {
     self.baseURL = baseURL
     self.tenantID = tenantID
     self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
     self.deviceID = deviceID
+    self.retryPolicy = RetryPolicy(maxRetries: retries)
   }
 
   func challenge(action: String? = nil, token: String? = nil) async -> AuthsignalResponse<ChallengeResponse> {

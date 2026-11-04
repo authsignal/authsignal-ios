@@ -7,8 +7,8 @@ public class AuthsignalQRCode {
   private let cache = TokenCache.shared
   private let keyManager = KeyManager(keySuffix: "qr_code")
 
-  public init(tenantID: String, baseURL: String) {
-    api = QRCodeAPIClient(tenantID: tenantID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String, retries: Int = 2) {
+    api = QRCodeAPIClient(tenantID: tenantID, baseURL: baseURL, retries: retries)
   }
 
   public func getCredential() async -> AuthsignalResponse<AppCredential> {

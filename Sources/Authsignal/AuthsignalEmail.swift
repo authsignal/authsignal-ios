@@ -6,8 +6,8 @@ public class AuthsignalEmail {
   private let api: EmailAPIClient
   private let cache = TokenCache.shared
 
-  public init(tenantID: String, baseURL: String) {
-    self.api = EmailAPIClient(tenantID: tenantID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String, retries: Int = 2) {
+    self.api = EmailAPIClient(tenantID: tenantID, baseURL: baseURL, retries: retries)
   }
 
   public func enroll(email: String) async -> AuthsignalResponse<EnrollResponse> {
