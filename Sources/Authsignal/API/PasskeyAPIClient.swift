@@ -10,7 +10,8 @@ class PasskeyAPIClient: BaseAPIClient {
 
     let body = RegistrationOptsRequest(username: username, displayName: displayName)
 
-    return await postRequest(url: url, body: body, token: token)
+    // A repeat call only creates another challenge, which goes unused.
+    return await postRequest(url: url, body: body, token: token, replaySafe: true)
   }
 
   func authenticationOptions(
@@ -21,7 +22,8 @@ class PasskeyAPIClient: BaseAPIClient {
   
     let body = AuthenticationOptsRequest(challengeId: challengeId)
 
-    return await postRequest(url: url, body: body, token: token)
+    // A repeat call only creates another challenge, which goes unused.
+    return await postRequest(url: url, body: body, token: token, replaySafe: true)
   }
 
   func addAuthenticator(

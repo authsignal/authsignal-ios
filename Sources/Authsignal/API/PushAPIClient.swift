@@ -66,7 +66,8 @@ class PushAPIClient: BaseAPIClient {
 
     let url = "\(baseURL)/client/user-authenticators/push/challenge/sign?publicKey=\(encodedKey)"
 
-    return await postRequest(url: url)
+    // A repeat call replaces the nonce, and only the latest one is accepted.
+    return await postRequest(url: url, replaySafe: true)
   }
 
   public func getSigningMessage(publicKey: String) async -> AuthsignalResponse<SigningMessageResponse> {

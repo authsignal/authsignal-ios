@@ -5,6 +5,7 @@ class BaseAPIClient {
   let tenantID: String
   let basicAuth: String
   let deviceID: String?
+  var retryPolicy = RetryPolicy.default
 
   public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
     self.baseURL = baseURL
@@ -18,7 +19,8 @@ class BaseAPIClient {
 
     let body = ChallengeRequest(action: action)
 
-    return await postRequest(url: url, body: body, token: token)
+    // A repeat call only creates another challenge, which goes unused.
+    return await postRequest(url: url, body: body, token: token, replaySafe: true)
   }
   
 
@@ -39,10 +41,13 @@ class BaseAPIClient {
 
     applyDefaultHeaders(to: &request)
 
-    return await performRequest(request: request)
+    return await performRequest(request: request, replaySafe: true)
   }
 
-  func postRequest<T: Decodable>(url: String, token: String? = nil) async -> AuthsignalResponse<T> {
+  /// - Parameter replaySafe: Whether calling the endpoint twice is harmless. See ``RetryPolicy``.
+  func postRequest<T: Decodable>(url: String, token: String? = nil, replaySafe: Bool = false)
+    async -> AuthsignalResponse<T>
+  {
     var request = URLRequest(url: URL(string: url)!)
 
     request.httpMethod = "POST"
@@ -55,12 +60,16 @@ class BaseAPIClient {
 
     applyDefaultHeaders(to: &request)
 
-    return await performRequest(request: request)
+    return await performRequest(request: request, replaySafe: replaySafe)
   }
-  
-  func postRequest<T: Decodable, TBody: Encodable>(url: String, body: TBody, token: String? = nil)
-    async -> AuthsignalResponse<T>
-  {
+
+  /// - Parameter replaySafe: Whether calling the endpoint twice is harmless. See ``RetryPolicy``.
+  func postRequest<T: Decodable, TBody: Encodable>(
+    url: String,
+    body: TBody,
+    token: String? = nil,
+    replaySafe: Bool = false
+  ) async -> AuthsignalResponse<T> {
     var request = URLRequest(url: URL(string: url)!)
 
     request.httpMethod = "POST"
@@ -80,7 +89,7 @@ class BaseAPIClient {
 
     applyDefaultHeaders(to: &request)
 
-    return await performRequest(request: request)
+    return await performRequest(request: request, replaySafe: replaySafe)
   }
 
   func patchRequest<T: Decodable, TBody: Encodable>(url: String, body: TBody, token: String? = nil)
@@ -105,7 +114,7 @@ class BaseAPIClient {
 
     applyDefaultHeaders(to: &request)
 
-    return await performRequest(request: request)
+    return await performRequest(request: request, replaySafe: false)
   }
 
   private func applyDefaultHeaders(to request: inout URLRequest) {
@@ -114,9 +123,9 @@ class BaseAPIClient {
     }
   }
 
-  private func performRequest<T: Decodable>(request: URLRequest) async -> AuthsignalResponse<T> {
+  private func performRequest<T: Decodable>(request: URLRequest, replaySafe: Bool) async -> AuthsignalResponse<T> {
     do {
-      let (data, response) = try await URLSession.shared.data(for: request)
+      let (data, response) = try await send(request: request, replaySafe: replaySafe)
 
       let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
 
@@ -165,6 +174,41 @@ class BaseAPIClient {
       Logger.error("API request error: \(error).")
 
       return AuthsignalResponse(error: error.localizedDescription, errorCode: "network_error")
+    }
+  }
+
+  /// Sends the request, and sends it again after failures that ``RetryPolicy`` allows.
+  /// Returns the last attempt's response, or throws its error.
+  private func send(request: URLRequest, replaySafe: Bool) async throws -> (Data, URLResponse) {
+    var retries = 0
+
+    while true {
+      let result: Result<(Data, URLResponse), Error>
+
+      do {
+        result = .success(try await URLSession.shared.data(for: request))
+      } catch {
+        result = .failure(error)
+      }
+
+      let retryAfter = (try? result.get().1 as? HTTPURLResponse)?.value(forHTTPHeaderField: "Retry-After")
+
+      guard retries < retryPolicy.maxRetries,
+        let outcome = RetryPolicy.outcome(of: result),
+        retryPolicy.shouldRetry(outcome, replaySafe: replaySafe),
+        let delay = retryPolicy.delay(beforeRetry: retries + 1, retryAfter: retryAfter)
+      else {
+        return try result.get()
+      }
+
+      retries += 1
+
+      Logger.info(
+        "Retrying \(request.httpMethod ?? "") \(request.url?.path ?? "") in \(String(format: "%.2f", delay))s "
+          + "after outcome \(outcome) (retry \(retries) of \(retryPolicy.maxRetries))."
+      )
+
+      try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
     }
   }
 }
