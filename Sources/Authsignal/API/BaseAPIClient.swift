@@ -6,6 +6,7 @@ class BaseAPIClient {
   let basicAuth: String
   let deviceID: String?
   var retryPolicy = RetryPolicy.default
+  var requestTimeout: TimeInterval = 20
 
   public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
     self.baseURL = baseURL
@@ -175,6 +176,9 @@ class BaseAPIClient {
   }
 
   private func send(request: URLRequest, replaySafe: Bool) async throws -> (Data, URLResponse) {
+    var request = request
+    request.timeoutInterval = requestTimeout
+
     var retries = 0
 
     while true {
