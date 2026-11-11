@@ -10,7 +10,7 @@ class PasskeyAPIClient: BaseAPIClient {
 
     let body = RegistrationOptsRequest(username: username, displayName: displayName)
 
-    return await postRequest(url: url, body: body, token: token, replaySafe: true)
+    return await postRequest(url: url, body: body, token: token)
   }
 
   func authenticationOptions(
@@ -21,7 +21,7 @@ class PasskeyAPIClient: BaseAPIClient {
   
     let body = AuthenticationOptsRequest(challengeId: challengeId)
 
-    return await postRequest(url: url, body: body, token: token, replaySafe: true)
+    return await postRequest(url: url, body: body, token: token)
   }
 
   func addAuthenticator(

@@ -62,15 +62,54 @@ struct RetryPolicy {
     }
   }
 
-  func shouldRetry(_ outcome: Outcome, replaySafe: Bool) -> Bool {
+  private static let retrySafeMethods: Set<String> = ["GET", "HEAD", "OPTIONS"]
+
+  // POST endpoints which only issue a fresh challenge, options or nonce, so repeating them is harmless
+  private static let retrySafePaths = [
+    "/client/challenge",
+    "/client/user-authenticators/passkey/registration-options",
+    "/client/user-authenticators/passkey/authentication-options",
+    "/client/user-authenticators/push/challenge/sign",
+  ]
+
+  static func isRetrySafe(_ request: URLRequest) -> Bool {
+    if let method = request.httpMethod, retrySafeMethods.contains(method) {
+      return true
+    }
+
+    guard let path = request.url?.path else { return false }
+
+    return retrySafePaths.contains { path.hasSuffix($0) }
+  }
+
+  static func isRetryable(_ outcome: Outcome, request: URLRequest) -> Bool {
     switch outcome {
     case .notSent, .rejected:
       return true
     case .unknown:
-      return replaySafe
+      return isRetrySafe(request)
     case .final:
       return false
     }
+  }
+
+  func retry(
+    _ retry: Int,
+    of request: URLRequest,
+    after result: Result<(Data, URLResponse), Error>
+  ) -> (outcome: Outcome, delay: TimeInterval)? {
+    guard retry <= maxRetries,
+      let outcome = RetryPolicy.outcome(of: result),
+      RetryPolicy.isRetryable(outcome, request: request)
+    else {
+      return nil
+    }
+
+    let retryAfter = (try? result.get().1 as? HTTPURLResponse)?.value(forHTTPHeaderField: "Retry-After")
+
+    guard let delay = delay(beforeRetry: retry, retryAfter: retryAfter) else { return nil }
+
+    return (outcome, delay)
   }
 
   func delay(beforeRetry retry: Int, retryAfter: String?) -> TimeInterval? {

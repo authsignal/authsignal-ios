@@ -21,7 +21,7 @@ class BaseAPIClient {
 
     let body = ChallengeRequest(action: action)
 
-    return await postRequest(url: url, body: body, token: token, replaySafe: true)
+    return await postRequest(url: url, body: body, token: token)
   }
   
 
@@ -42,10 +42,10 @@ class BaseAPIClient {
 
     applyDefaultHeaders(to: &request)
 
-    return await performRequest(request: request, replaySafe: true)
+    return await performRequest(request: request)
   }
 
-  func postRequest<T: Decodable>(url: String, token: String? = nil, replaySafe: Bool = false)
+  func postRequest<T: Decodable>(url: String, token: String? = nil)
     async -> AuthsignalResponse<T>
   {
     var request = URLRequest(url: URL(string: url)!)
@@ -60,14 +60,13 @@ class BaseAPIClient {
 
     applyDefaultHeaders(to: &request)
 
-    return await performRequest(request: request, replaySafe: replaySafe)
+    return await performRequest(request: request)
   }
 
   func postRequest<T: Decodable, TBody: Encodable>(
     url: String,
     body: TBody,
-    token: String? = nil,
-    replaySafe: Bool = false
+    token: String? = nil
   ) async -> AuthsignalResponse<T> {
     var request = URLRequest(url: URL(string: url)!)
 
@@ -88,7 +87,7 @@ class BaseAPIClient {
 
     applyDefaultHeaders(to: &request)
 
-    return await performRequest(request: request, replaySafe: replaySafe)
+    return await performRequest(request: request)
   }
 
   func patchRequest<T: Decodable, TBody: Encodable>(url: String, body: TBody, token: String? = nil)
@@ -113,7 +112,7 @@ class BaseAPIClient {
 
     applyDefaultHeaders(to: &request)
 
-    return await performRequest(request: request, replaySafe: false)
+    return await performRequest(request: request)
   }
 
   private func applyDefaultHeaders(to request: inout URLRequest) {
@@ -122,9 +121,9 @@ class BaseAPIClient {
     }
   }
 
-  private func performRequest<T: Decodable>(request: URLRequest, replaySafe: Bool) async -> AuthsignalResponse<T> {
+  private func performRequest<T: Decodable>(request: URLRequest) async -> AuthsignalResponse<T> {
     do {
-      let (data, response) = try await send(request: request, replaySafe: replaySafe)
+      let (data, response) = try await send(request: request)
 
       let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
 
@@ -176,7 +175,7 @@ class BaseAPIClient {
     }
   }
 
-  private func send(request: URLRequest, replaySafe: Bool) async throws -> (Data, URLResponse) {
+  private func send(request: URLRequest) async throws -> (Data, URLResponse) {
     var request = request
     request.timeoutInterval = requestTimeout
 
@@ -191,13 +190,7 @@ class BaseAPIClient {
         result = .failure(error)
       }
 
-      let retryAfter = (try? result.get().1 as? HTTPURLResponse)?.value(forHTTPHeaderField: "Retry-After")
-
-      guard retries < retryPolicy.maxRetries,
-        let outcome = RetryPolicy.outcome(of: result),
-        retryPolicy.shouldRetry(outcome, replaySafe: replaySafe),
-        let delay = retryPolicy.delay(beforeRetry: retries + 1, retryAfter: retryAfter)
-      else {
+      guard let (outcome, delay) = retryPolicy.retry(retries + 1, of: request, after: result) else {
         return try result.get()
       }
 
