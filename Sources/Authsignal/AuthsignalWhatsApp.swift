@@ -6,8 +6,8 @@ public class AuthsignalWhatsApp {
   private let api: WhatsAppAPIClient
   private let cache = TokenCache.shared
   
-  public init(tenantID: String, baseURL: String) {
-    self.api = WhatsAppAPIClient(tenantID: tenantID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String, retries: Int = 2) {
+    self.api = WhatsAppAPIClient(tenantID: tenantID, baseURL: baseURL, retries: retries)
   }
   
   public func challenge() async -> AuthsignalResponse<ChallengeResponse> {

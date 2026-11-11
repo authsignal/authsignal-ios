@@ -6,8 +6,8 @@ public class AuthsignalTOTP {
   private let api: TOTPAPIClient
   private let cache = TokenCache.shared
 
-  public init(tenantID: String, baseURL: String) {
-    self.api = TOTPAPIClient(tenantID: tenantID, baseURL: baseURL)
+  public init(tenantID: String, baseURL: String, retries: Int = 2) {
+    self.api = TOTPAPIClient(tenantID: tenantID, baseURL: baseURL, retries: retries)
   }
 
   public func enroll() async -> AuthsignalResponse<EnrollTOTPResponse> {

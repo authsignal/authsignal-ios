@@ -5,12 +5,15 @@ class BaseAPIClient {
   let tenantID: String
   let basicAuth: String
   let deviceID: String?
+  var retryPolicy: RetryPolicy
+  var requestTimeout: TimeInterval = 20
 
-  public init(tenantID: String, baseURL: String, deviceID: String? = nil) {
+  public init(tenantID: String, baseURL: String, deviceID: String? = nil, retries: Int = 2) {
     self.baseURL = baseURL
     self.tenantID = tenantID
     self.basicAuth = "Basic \(Data( "\(tenantID):".utf8).base64URLEncodedString())"
     self.deviceID = deviceID
+    self.retryPolicy = RetryPolicy(maxRetries: retries)
   }
 
   func challenge(action: String? = nil, token: String? = nil) async -> AuthsignalResponse<ChallengeResponse> {
@@ -42,7 +45,9 @@ class BaseAPIClient {
     return await performRequest(request: request)
   }
 
-  func postRequest<T: Decodable>(url: String, token: String? = nil) async -> AuthsignalResponse<T> {
+  func postRequest<T: Decodable>(url: String, token: String? = nil)
+    async -> AuthsignalResponse<T>
+  {
     var request = URLRequest(url: URL(string: url)!)
 
     request.httpMethod = "POST"
@@ -57,10 +62,12 @@ class BaseAPIClient {
 
     return await performRequest(request: request)
   }
-  
-  func postRequest<T: Decodable, TBody: Encodable>(url: String, body: TBody, token: String? = nil)
-    async -> AuthsignalResponse<T>
-  {
+
+  func postRequest<T: Decodable, TBody: Encodable>(
+    url: String,
+    body: TBody,
+    token: String? = nil
+  ) async -> AuthsignalResponse<T> {
     var request = URLRequest(url: URL(string: url)!)
 
     request.httpMethod = "POST"
@@ -116,7 +123,7 @@ class BaseAPIClient {
 
   private func performRequest<T: Decodable>(request: URLRequest) async -> AuthsignalResponse<T> {
     do {
-      let (data, response) = try await URLSession.shared.data(for: request)
+      let (data, response) = try await send(request: request)
 
       let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
 
@@ -165,6 +172,36 @@ class BaseAPIClient {
       Logger.error("API request error: \(error).")
 
       return AuthsignalResponse(error: error.localizedDescription, errorCode: "network_error")
+    }
+  }
+
+  private func send(request: URLRequest) async throws -> (Data, URLResponse) {
+    var request = request
+    request.timeoutInterval = requestTimeout
+
+    var retries = 0
+
+    while true {
+      let result: Result<(Data, URLResponse), Error>
+
+      do {
+        result = .success(try await URLSession.shared.data(for: request))
+      } catch {
+        result = .failure(error)
+      }
+
+      guard let (outcome, delay) = retryPolicy.retry(retries + 1, of: request, after: result) else {
+        return try result.get()
+      }
+
+      retries += 1
+
+      Logger.info(
+        "Retrying \(request.httpMethod ?? "") \(request.url?.path ?? "") in \(String(format: "%.2f", delay))s "
+          + "after outcome \(outcome) (retry \(retries) of \(retryPolicy.maxRetries))."
+      )
+
+      try await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
     }
   }
 }
