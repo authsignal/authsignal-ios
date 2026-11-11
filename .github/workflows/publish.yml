@@ -27,4 +27,27 @@ jobs:
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
-          pod trunk push --allow-warnings
+          VERSION=$(pod ipc spec Authsignal.podspec | jq -r .version)
+
+          published() {
+            pod trunk info Authsignal | grep -F -- "- $VERSION (" > /dev/null
+          }
+
+          if published; then
+            echo "Authsignal $VERSION is already on CocoaPods trunk"
+            exit 0
+          fi
+
+          if pod trunk push --allow-warnings; then
+            exit 0
+          fi
+
+          # Trunk sometimes returns a 500 after the version has been published
+          sleep 30
+
+          if published; then
+            echo "::warning::pod trunk push failed but Authsignal $VERSION was published"
+            exit 0
+          fi
+
+          exit 1
