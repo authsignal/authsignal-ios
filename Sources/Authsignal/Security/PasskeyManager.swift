@@ -94,18 +94,17 @@ class PasskeyManager: NSObject {
       self.controller = nil
       self.continuation = nil
       
-      if #available(iOS 18.0, *),
-         let authError = error as? ASAuthorizationError,
-         authError.code == .matchedExcludedCredential {
+      if PasskeyManager.isMatchedExcludedCredentialError(error) {
         return AuthsignalResponse(
           error: "An existing credential is already available for this device.",
-          errorCode: SdkErrorCodes.matchedExcludedCredential
+          errorCode: SdkErrorCodes.matchedExcludedCredential,
+          nativeError: error
         )
       }
-      
+
       Logger.error("Registration error: \(error)")
-      
-      return AuthsignalResponse(error: error.localizedDescription)
+
+      return AuthsignalResponse(error: error.localizedDescription, nativeError: error)
     }
   }
 
@@ -195,7 +194,7 @@ class PasskeyManager: NSObject {
       
       Logger.error("Passkey authentication error: \(error)")
 
-      return AuthsignalResponse(error: error.localizedDescription)
+      return AuthsignalResponse(error: error.localizedDescription, nativeError: error)
     }
   }
 
@@ -237,6 +236,28 @@ class PasskeyManager: NSObject {
         return "Error decoding allowed credential ID."
       }
     }
+  }
+
+  static func isMatchedExcludedCredentialError(_ error: Error) -> Bool {
+    if #available(iOS 18.0, *),
+       let authError = error as? ASAuthorizationError,
+       authError.code == .matchedExcludedCredential {
+      return true
+    }
+
+    // The platform authenticator can instead surface WebKit's InvalidStateError
+    // (WKErrorDomain code 8), which WebAuthn only raises for an excluded credential.
+    var current: NSError? = error as NSError
+
+    while let nsError = current {
+      if nsError.domain == "WKErrorDomain" && nsError.code == 8 {
+        return true
+      }
+
+      current = nsError.userInfo[NSUnderlyingErrorKey] as? NSError
+    }
+
+    return false
   }
 
   func cancelRequest() {
