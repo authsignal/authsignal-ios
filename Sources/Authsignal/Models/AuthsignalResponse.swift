@@ -4,9 +4,7 @@ public struct AuthsignalResponse<T> {
   public let data: T?
   public let error: String?
   public let errorCode: String?
-  /// The domain of the error returned by the OS, when there was one (e.g. a passkey request).
   public let nativeErrorDomain: String?
-  /// The code of the error returned by the OS, when there was one (e.g. a passkey request).
   public let nativeErrorCode: Int?
 
   init(data: T, error: String?, errorCode: String? = nil) {
