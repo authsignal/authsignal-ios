@@ -45,7 +45,12 @@ public class AuthsignalPasskey {
     }
     
     if let error = credentialResponse.error {
-      return AuthsignalResponse(error: error, errorCode: credentialResponse.errorCode)
+      return AuthsignalResponse(
+        error: error,
+        errorCode: credentialResponse.errorCode,
+        nativeErrorDomain: credentialResponse.nativeErrorDomain,
+        nativeErrorCode: credentialResponse.nativeErrorCode
+      )
     }
 
     guard let credential = credentialResponse.data else {
@@ -124,7 +129,11 @@ public class AuthsignalPasskey {
     }
     
     if let error = credentialResponse.error {
-      return AuthsignalResponse(error: error)
+      return AuthsignalResponse(
+        error: error,
+        nativeErrorDomain: credentialResponse.nativeErrorDomain,
+        nativeErrorCode: credentialResponse.nativeErrorCode
+      )
     }
 
     guard let credential = credentialResponse.data else {
